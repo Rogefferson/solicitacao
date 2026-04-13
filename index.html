@@ -39,9 +39,9 @@
 
         <div class="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
             <div>
-                <h1 class="text-3xl font-extrabold tracking-tight text-igreja-black">Solicitação de Materiais</h1>
+                <h1 class="text-3xl font-extrabold tracking-tight text-igreja-black">Solicitação de Criativos</h1>
                 <p id="descricaoForm" class="text-gray-600 mt-1.5 text-base font-normal">Preencha os dados abaixo para
-                    produção de mídia.</p>
+                    enviar as informações para mídia e gestão de culto.</p>
             </div>
             <div class="w-16 h-16 flex items-center justify-center">
                 <img src="logoigreja.png" alt="Logo da Igreja" class="h-14 w-auto object-contain">
@@ -58,7 +58,7 @@
                     </div>
                     <input type="text" id="departamento" required
                         class="block w-full rounded-xl border-gray-200 bg-igreja-gray shadow-inner focus:ring-2 focus:ring-igreja-blue focus:bg-white border p-3 pl-11 text-base transition duration-150"
-                        placeholder="Ex: Jovens, Mulheres...">
+                        placeholder="Ex: GS, Verbo Empreender, Futvida...">
                 </div>
             </div>
 
@@ -105,8 +105,8 @@
                 <div
                     class="mt-2.5 flex items-start gap-2 text-xs p-3 bg-orange-50 rounded-lg text-orange-800 border border-orange-200">
                     <i class="fa-solid fa-triangle-exclamation mt-0.5 text-orange-500"></i>
-                    <p><b>Atenção:</b> Se houver foto de ministro lembre-se de anexar a foto direto no WhatsApp após
-                        clicar em enviar.</p>
+                    <p><b>Atenção:</b> Caso precise colocar alguma imagem ou foto, lembre-se de anexar direto no
+                        WhatsApp após clicar em enviar.</p>
                 </div>
             </div>
 
@@ -116,7 +116,7 @@
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
                         <i class="fa-solid fa-location-dot text-sm"></i>
                     </div>
-                    <input type="text" id="local" required placeholder="Ex: Templo Principal..."
+                    <input type="text" id="local" required placeholder="Ex: Nave, GD, Projeto..."
                         class="block w-full rounded-xl border-gray-200 bg-igreja-gray shadow-inner focus:ring-2 focus:ring-igreja-blue focus:bg-white border p-3 pl-11 text-base">
                 </div>
             </div>
@@ -164,7 +164,8 @@
             </div>
 
             <div>
-                <label class="block text-sm font-semibold text-gray-800 mb-1.5">Observações adicionais</label>
+                <label class="block text-sm font-semibold text-gray-800 mb-1.5">Descrição e observações
+                    adicionais</label>
                 <textarea id="observacoes" rows="3"
                     class="block w-full rounded-xl border-gray-200 bg-igreja-gray shadow-inner focus:ring-2 focus:ring-igreja-blue focus:bg-white border p-3 text-base"
                     placeholder="Informações extras..."></textarea>
@@ -183,14 +184,14 @@
                 <i class="fa-solid fa-circle-check text-4xl"></i>
             </div>
             <h2 class="text-2xl font-extrabold text-green-900 mb-2">Solicitação Gerada!</h2>
-            <p class="text-base text-green-800 mb-6 max-w-md mx-auto">Clique nos botões abaixo para enviar no WhatsApp.
-            </p>
+            <p class="text-base text-green-800 mb-6 max-w-md mx-auto">Escolha o destinatário abaixo para enviar no
+                WhatsApp.</p>
 
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a id="btnMidia" target="_blank"
+                <button onclick="enviarParaGrupoMidia()"
                     class="w-full sm:w-auto bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-3.5 px-8 rounded-full hover:from-green-600 hover:to-green-700 transition duration-200 flex justify-center items-center text-base shadow-md shadow-green-500/30">
-                    <i class="fa-brands fa-whatsapp text-2xl mr-2.5"></i> Enviar p/ Mídia
-                </a>
+                    <i class="fa-solid fa-copy text-xl mr-2.5"></i> Copiar e colocar no Solicitação Mídia
+                </button>
                 <a id="btnGestao" target="_blank"
                     class="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 text-white font-bold py-3.5 px-8 rounded-full hover:from-green-700 hover:to-green-800 transition duration-200 flex justify-center items-center text-base shadow-md shadow-green-600/30">
                     <i class="fa-brands fa-whatsapp text-2xl mr-2.5"></i> Enviar p/ Gestão
@@ -205,7 +206,9 @@
     </div>
 
     <script>
-        const numeroPadrao = "5581987348530";
+        const linkGrupoMidia = "https://chat.whatsapp.com/7EE237jhu0GKXIKPEpASIi";
+        const numeroGestao = "5581986228083";
+        let mensagemFinal = "";
 
         function prepararEnvio(event) {
             event.preventDefault();
@@ -235,24 +238,34 @@
             });
             const artesTexto = artesSelecionadas.length > 0 ? artesSelecionadas.join('\n') : "Nenhuma arte selecionada";
 
-            const mensagem = `SOLICITACAO DE MATERIAIS\n\n` +
+            mensagemFinal = `SOLICITACAO DE CRIATIVOS\n\n` +
                 `Departamento: ${departamento}\n` +
                 `Data: ${textoData} as ${horario}\n` +
                 `Tema: ${tema}\n` +
                 `Preletor: ${preletor}\n` +
                 `Local: ${local}\n\n` +
                 `Materiais solicitados:\n${artesTexto}\n\n` +
-                `Observacoes:\n${observacoes}`;
+                `Descrição e solicitação:\n${observacoes}`;
 
-            const textoCodificado = encodeURIComponent(mensagem);
+            const textoCodificado = encodeURIComponent(mensagemFinal);
 
-            document.getElementById('btnMidia').href = `https://wa.me/${numeroPadrao}?text=${textoCodificado}`;
-            document.getElementById('btnGestao').href = `https://wa.me/${numeroPadrao}?text=${textoCodificado}`;
+            // Configura o link direto para Gestão
+            document.getElementById('btnGestao').href = `https://wa.me/${numeroGestao}?text=${textoCodificado}`;
 
             document.getElementById('descricaoForm').classList.add('hidden');
             document.getElementById('mediaForm').classList.add('hidden');
             document.getElementById('areaEnvio').classList.remove('hidden');
             window.scrollTo(0, 0);
+        }
+
+        function enviarParaGrupoMidia() {
+            navigator.clipboard.writeText(mensagemFinal).then(() => {
+                alert("Dados da Mídia copiados! Basta colar no grupo que será aberto.");
+                window.open(linkGrupoMidia, '_blank');
+            }).catch(err => {
+                console.error('Erro ao copiar: ', err);
+                window.open(linkGrupoMidia, '_blank');
+            });
         }
 
         function resetarFormulario() {
