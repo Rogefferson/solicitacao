@@ -69,7 +69,7 @@
                         class="block w-full rounded-lg border-gray-200 bg-white focus:ring-2 focus:ring-igreja-blue border p-2.5 text-base">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-600 mb-1">Data de término</label>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Data de término(Opcional)</label>
                     <input type="date" id="dataFim"
                         class="block w-full rounded-lg border-gray-200 bg-white focus:ring-2 focus:ring-igreja-blue border p-2.5 text-base">
                 </div>
@@ -249,7 +249,6 @@
 
             const textoCodificado = encodeURIComponent(mensagemFinal);
 
-            // Configura o link direto para Gestão
             document.getElementById('btnGestao').href = `https://wa.me/${numeroGestao}?text=${textoCodificado}`;
 
             document.getElementById('descricaoForm').classList.add('hidden');
