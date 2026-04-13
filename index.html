@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitação de Materiais - Igreja</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        igreja: {
+                            blue: '#0047AB',
+                            black: '#111111',
+                            white: '#FFFFFF',
+                            gray: '#F3F4F6'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #e0e7ff 0%, #ffffff 100%);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen p-4 md:p-8 flex justify-center items-center font-sans antialiased text-igreja-black">
+
+    <div
+        class="bg-white/80 backdrop-blur-sm p-6 md:p-10 rounded-3xl shadow-2xl w-full max-w-3xl border border-white/50">
+
+        <div class="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight text-igreja-black">Solicitação de Materiais</h1>
+                <p id="descricaoForm" class="text-gray-600 mt-1.5 text-base font-normal">Preencha os dados abaixo para
+                    produção de mídia.</p>
+            </div>
+            <div class="w-16 h-16 flex items-center justify-center">
+                <img src="logoigreja.png" alt="Logo da Igreja" class="h-14 w-auto object-contain">
+            </div>
+        </div>
+
+        <form id="mediaForm" class="space-y-6" onsubmit="prepararEnvio(event)">
+
+            <div class="relative">
+                <label class="block text-sm font-semibold text-gray-800 mb-1.5">Departamento responsável</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                        <i class="fa-solid fa-camera text-sm"></i>
+                    </div>
+                    <input type="text" id="departamento" required
+                        class="block w-full rounded-xl border-gray-200 bg-igreja-gray shadow-inner focus:ring-2 focus:ring-igreja-blue focus:bg-white border p-3 pl-11 text-base transition duration-150"
+                        placeholder="Ex: Jovens, Mulheres...">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 p-5 bg-gray-50 rounded-2xl border border-gray-100">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Data de início</label>
+                    <input type="date" id="dataInicio" required
+                        class="block w-full rounded-lg border-gray-200 bg-white focus:ring-2 focus:ring-igreja-blue border p-2.5 text-base">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Data de término</label>
+                    <input type="date" id="dataFim"
+                        class="block w-full rounded-lg border-gray-200 bg-white focus:ring-2 focus:ring-igreja-blue border p-2.5 text-base">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Horário</label>
+                    <input type="time" id="horario" required
+                        class="block w-full rounded-lg border-gray-200 bg-white focus:ring-2 focus:ring-igreja-blue border p-2.5 text-base">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-800 mb-1.5">Tema do evento</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                        <i class="fa-solid fa-keyboard text-sm"></i>
+                    </div>
+                    <input type="text" id="tema" required
+                        class="block w-full rounded-xl border-gray-200 bg-igreja-gray shadow-inner focus:ring-2 focus:ring-igreja-blue focus:bg-white border p-3 pl-11 text-base"
+                        placeholder="Título principal do evento">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-800 mb-1.5">Nome(s) do(s) preletor(es)</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                        <i class="fa-solid fa-user-group text-sm"></i>
+                    </div>
+                    <input type="text" id="preletor" required
+                        class="block w-full rounded-xl border-gray-200 bg-igreja-gray shadow-inner focus:ring-2 focus:ring-igreja-blue focus:bg-white border p-3 pl-11 text-base">
+                </div>
+
+                <div
+                    class="mt-2.5 flex items-start gap-2 text-xs p-3 bg-orange-50 rounded-lg text-orange-800 border border-orange-200">
+                    <i class="fa-solid fa-triangle-exclamation mt-0.5 text-orange-500"></i>
+                    <p><b>Atenção:</b> Se houver foto de ministro lembre-se de anexar a foto direto no WhatsApp após
+                        clicar em enviar.</p>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-800 mb-1.5">Local do evento</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                        <i class="fa-solid fa-location-dot text-sm"></i>
+                    </div>
+                    <input type="text" id="local" required placeholder="Ex: Templo Principal..."
+                        class="block w-full rounded-xl border-gray-200 bg-igreja-gray shadow-inner focus:ring-2 focus:ring-igreja-blue focus:bg-white border p-3 pl-11 text-base">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-lg font-semibold text-igreja-black mb-3">Artes solicitadas</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label
+                        class="flex items-center gap-3 p-4 bg-igreja-gray rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
+                        <input type="checkbox" name="arte" value="Banner Telão da Igreja"
+                            class="w-5 h-5 rounded-md border-gray-300 text-igreja-blue">
+                        <span class="text-sm text-gray-800 font-medium">Banner Telão da Igreja</span>
+                    </label>
+                    <label
+                        class="flex items-center gap-3 p-4 bg-igreja-gray rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
+                        <input type="checkbox" name="arte" value="Banner Instagram"
+                            class="w-5 h-5 rounded-md border-gray-300 text-igreja-blue">
+                        <span class="text-sm text-gray-800 font-medium">Banner Instagram</span>
+                    </label>
+                    <label
+                        class="flex items-center gap-3 p-4 bg-igreja-gray rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
+                        <input type="checkbox" name="arte" value="Banner WhatsApp"
+                            class="w-5 h-5 rounded-md border-gray-300 text-igreja-blue">
+                        <span class="text-sm text-gray-800 font-medium">Banner WhatsApp</span>
+                    </label>
+                    <label
+                        class="flex items-center gap-3 p-4 bg-igreja-gray rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
+                        <input type="checkbox" name="arte" value="Vídeo de chamada p/ Telão (combinar com o pastor)"
+                            class="w-5 h-5 rounded-md border-gray-300 text-igreja-blue">
+                        <span class="text-sm text-gray-800 font-medium">Vídeo de chamada p/ Telão</span>
+                    </label>
+                    <label
+                        class="flex items-center gap-3 p-4 bg-igreja-gray rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
+                        <input type="checkbox" name="arte" value="Stories Instagram (a combinar)"
+                            class="w-5 h-5 rounded-md border-gray-300 text-igreja-blue">
+                        <span class="text-sm text-gray-800 font-medium">Stories Instagram</span>
+                    </label>
+                    <label
+                        class="flex items-center gap-3 p-4 bg-igreja-gray rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
+                        <input type="checkbox" name="arte" value="Reels Instagram (a combinar)"
+                            class="w-5 h-5 rounded-md border-gray-300 text-igreja-blue">
+                        <span class="text-sm text-gray-800 font-medium">Reels Instagram</span>
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-800 mb-1.5">Observações adicionais</label>
+                <textarea id="observacoes" rows="3"
+                    class="block w-full rounded-xl border-gray-200 bg-igreja-gray shadow-inner focus:ring-2 focus:ring-igreja-blue focus:bg-white border p-3 text-base"
+                    placeholder="Informações extras..."></textarea>
+            </div>
+
+            <button type="submit"
+                class="w-full bg-igreja-blue text-white font-bold py-4 px-6 rounded-full hover:bg-blue-800 transform hover:scale-[1.01] transition duration-200 flex justify-center items-center text-lg shadow-lg shadow-blue-500/30">
+                <i class="fa-solid fa-paper-plane mr-2.5"></i> Gerar Solicitação
+            </button>
+        </form>
+
+        <div id="areaEnvio"
+            class="hidden mt-8 p-8 bg-green-50/50 backdrop-blur-sm border-2 border-green-200 rounded-3xl text-center shadow-xl">
+            <div
+                class="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-5 text-green-600 border border-green-200">
+                <i class="fa-solid fa-circle-check text-4xl"></i>
+            </div>
+            <h2 class="text-2xl font-extrabold text-green-900 mb-2">Solicitação Gerada!</h2>
+            <p class="text-base text-green-800 mb-6 max-w-md mx-auto">Clique nos botões abaixo para enviar no WhatsApp.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a id="btnMidia" target="_blank"
+                    class="w-full sm:w-auto bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-3.5 px-8 rounded-full hover:from-green-600 hover:to-green-700 transition duration-200 flex justify-center items-center text-base shadow-md shadow-green-500/30">
+                    <i class="fa-brands fa-whatsapp text-2xl mr-2.5"></i> Enviar p/ Mídia
+                </a>
+                <a id="btnGestao" target="_blank"
+                    class="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 text-white font-bold py-3.5 px-8 rounded-full hover:from-green-700 hover:to-green-800 transition duration-200 flex justify-center items-center text-base shadow-md shadow-green-600/30">
+                    <i class="fa-brands fa-whatsapp text-2xl mr-2.5"></i> Enviar p/ Gestão
+                </a>
+            </div>
+
+            <button onclick="resetarFormulario()"
+                class="mt-6 text-sm text-gray-500 underline hover:text-igreja-black font-medium">Fazer nova
+                solicitação</button>
+        </div>
+
+    </div>
+
+    <script>
+        const numeroPadrao = "5581987348530";
+
+        function prepararEnvio(event) {
+            event.preventDefault();
+
+            const departamento = document.getElementById('departamento').value;
+            const dataInicioInput = document.getElementById('dataInicio').value.split('-');
+            const dataInicioFormatada = `${dataInicioInput[2]}/${dataInicioInput[1]}/${dataInicioInput[0]}`;
+            const dataFimVal = document.getElementById('dataFim').value;
+
+            let textoData = dataInicioFormatada;
+            if (dataFimVal && dataFimVal !== document.getElementById('dataInicio').value) {
+                const dataFimInput = dataFimVal.split('-');
+                const dataFimFormatada = `${dataFimInput[2]}/${dataFimInput[1]}/${dataFimInput[0]}`;
+                textoData = `${dataInicioFormatada} ate ${dataFimFormatada}`;
+            }
+
+            const horario = document.getElementById('horario').value;
+            const tema = document.getElementById('tema').value;
+            const preletor = document.getElementById('preletor').value;
+            const local = document.getElementById('local').value;
+            const observacoes = document.getElementById('observacoes').value || "Nao existe";
+
+            const checkboxes = document.querySelectorAll('input[name="arte"]:checked');
+            let artesSelecionadas = [];
+            checkboxes.forEach((cb) => {
+                artesSelecionadas.push(`- ${cb.value}`);
+            });
+            const artesTexto = artesSelecionadas.length > 0 ? artesSelecionadas.join('\n') : "Nenhuma arte selecionada";
+
+            const mensagem = `SOLICITACAO DE MATERIAIS\n\n` +
+                `Departamento: ${departamento}\n` +
+                `Data: ${textoData} as ${horario}\n` +
+                `Tema: ${tema}\n` +
+                `Preletor: ${preletor}\n` +
+                `Local: ${local}\n\n` +
+                `Materiais solicitados:\n${artesTexto}\n\n` +
+                `Observacoes:\n${observacoes}`;
+
+            const textoCodificado = encodeURIComponent(mensagem);
+
+            document.getElementById('btnMidia').href = `https://wa.me/${numeroPadrao}?text=${textoCodificado}`;
+            document.getElementById('btnGestao').href = `https://wa.me/${numeroPadrao}?text=${textoCodificado}`;
+
+            document.getElementById('descricaoForm').classList.add('hidden');
+            document.getElementById('mediaForm').classList.add('hidden');
+            document.getElementById('areaEnvio').classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        function resetarFormulario() {
+            document.getElementById('mediaForm').reset();
+            document.getElementById('descricaoForm').classList.remove('hidden');
+            document.getElementById('mediaForm').classList.remove('hidden');
+            document.getElementById('areaEnvio').classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>
