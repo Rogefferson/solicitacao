@@ -1148,6 +1148,7 @@
     async function init() {
       buildBoard();
       await loadCards();
+      await checkAutoArquivar(); // ← Adicione esta linha aqui
       await checkAutoAvisos(); // ← regra: ≤14 dias → coluna Avisos
     }
 
@@ -1587,6 +1588,39 @@
       closeDetailModal();
       toast('Card excluído.', 'success');
       currentId = null;
+    }
+
+    /* ═══════════════════════════════════════════════
+   AUTO-ARQUIVAR: move cards com data passada para Arquivado
+   ═══════════════════════════════════════════════ */
+    async function checkAutoArquivar() {
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+
+      const paraArquivar = allCards.filter(card => {
+        if (!card.data_inicio) return false;
+        if (card.status === 'arquivado') return false; // Ignora se já estiver arquivado
+
+        const evento = new Date(card.data_inicio + 'T00:00:00');
+        // Se a data do evento for menor que hoje, ele passou
+        return evento < hoje;
+      });
+
+      if (!paraArquivar.length) return;
+
+      for (const card of paraArquivar) {
+        const { error } = await db
+          .from('cards')
+          .update({ status: 'arquivado' })
+          .eq('id', card.id);
+
+        if (!error) card.status = 'arquivado';
+      }
+
+      renderAll();
+      initSortable();
+      updateTotalBadge();
+      toast(`📦 ${paraArquivar.length} card(s) antigos foram arquivados.`, 'success');
     }
 
     /* ═══════════════════════════════════════════════
