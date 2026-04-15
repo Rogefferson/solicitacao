@@ -22,27 +22,48 @@
         }
     </script>
     <style>
-        /* 1. ESCONDER SCROLLBARS */
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
+        /* 1. ESCONDER SCROLLBARS MANTENDO A FUNCIONALIDADE */
         .hide-scrollbar {
             -ms-overflow-style: none;
-            /* IE and Edge */
+            /* IE/Edge */
             scrollbar-width: none;
             /* Firefox */
         }
 
-        /* 2. ESTILO DAS COLUNAS */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+            /* Chrome/Safari */
+        }
+
+        /* 2. ESTILO DAS COLUNAS - ESSENCIAL PARA O SCROLL VERTICAL */
         .kanban-column {
-            min-height: 500px;
+            min-height: 200px;
+            max-height: 70vh;
+            /* Limita a altura para o scroll interno funcionar */
+            overflow-y: auto;
+            /* Permite scroll vertical */
+            overflow-x: hidden;
             transition: background-color 0.2s;
             cursor: grab;
             user-select: none;
-            /* Evita selecionar texto ao arrastar */
+            -webkit-user-select: none;
+            scroll-behavior: smooth;
         }
 
+        /* Container Principal - Ajuste para o Scroll Lateral */
+        #kanban-container {
+            display: flex;
+            overflow-x: auto;
+            /* Permite scroll horizontal */
+            overflow-y: hidden;
+            cursor: grab;
+            gap: 1.5rem;
+            padding-bottom: 2rem;
+            min-height: calc(100vh - 150px);
+            width: 100%;
+        }
+
+        #kanban-container:active,
         .kanban-column:active {
             cursor: grabbing;
         }
@@ -52,20 +73,6 @@
             border: 2px dashed #0047AB;
             border-radius: 12px;
             margin-bottom: 12px;
-        }
-
-        /* Container Principal */
-        #kanban-container {
-            display: flex;
-            overflow-x: auto;
-            cursor: grab;
-            scroll-behavior: auto;
-            gap: 1.5rem;
-            padding-bottom: 2rem;
-        }
-
-        #kanban-container:active {
-            cursor: grabbing;
         }
 
         .kanban-card {
@@ -102,7 +109,7 @@
     </nav>
 
     <main class="p-6">
-        <div id="kanban-container" class="hide-scrollbar items-start" style="min-height: calc(100vh - 120px);">
+        <div id="kanban-container" class="hide-scrollbar items-start">
         </div>
     </main>
 
@@ -157,47 +164,48 @@
             renderizarColunas();
             carregarCards();
             ativarRealtime();
-            // Scroll horizontal do container principal
-            makeDraggableScroll(document.getElementById('kanban-container'), 'x');
+
+            // Scroll lateral do container principal
+            const mainContainer = document.getElementById('kanban-container');
+            makeDraggableScroll(mainContainer, 'x');
         });
 
-        // --- FUNÇÃO DE DRAG SCROLL MELHORADA ---
+        // --- FUNÇÃO DE DRAG SCROLL CORRIGIDA ---
         function makeDraggableScroll(element, axis = 'both') {
             let isDown = false;
             let startX, startY, scrollLeft, scrollTop;
 
             element.addEventListener('mousedown', (e) => {
-                // Impede o drag se clicar em card ou botão
-                if (e.target.closest('.kanban-card') || e.target.closest('button')) return;
+                // Não inicia o drag se clicar em cards ou botões para não atrapalhar o SortableJS ou cliques
+                if (e.target.closest('.kanban-card') || e.target.closest('button') || e.target.closest('input')) return;
 
                 isDown = true;
-                element.style.cursor = 'grabbing';
+                element.classList.add('active'); // CSS opcional para feedback
 
                 startX = e.pageX - element.offsetLeft;
                 startY = e.pageY - element.offsetTop;
                 scrollLeft = element.scrollLeft;
                 scrollTop = element.scrollTop;
-
-                // Impede o navegador de tentar "arrastar" o conteúdo como imagem/texto
-                e.preventDefault();
             });
 
-            element.addEventListener('mouseleave', () => { isDown = false; element.style.cursor = 'grab'; });
-            element.addEventListener('mouseup', () => { isDown = false; element.style.cursor = 'grab'; });
+            element.addEventListener('mouseleave', () => { isDown = false; });
+            element.addEventListener('mouseup', () => { isDown = false; });
 
             element.addEventListener('mousemove', (e) => {
                 if (!isDown) return;
+
+                // e.preventDefault() aqui evita que o navegador selecione texto enquanto você arrasta
                 e.preventDefault();
 
                 if (axis === 'x' || axis === 'both') {
                     const x = e.pageX - element.offsetLeft;
-                    const walkX = (x - startX) * 1.5;
+                    const walkX = (x - startX) * 2; // Velocidade do scroll
                     element.scrollLeft = scrollLeft - walkX;
                 }
 
                 if (axis === 'y' || axis === 'both') {
                     const y = e.pageY - element.offsetTop;
-                    const walkY = (y - startY) * 1.5;
+                    const walkY = (y - startY) * 2;
                     element.scrollTop = scrollTop - walkY;
                 }
             });
@@ -209,20 +217,20 @@
 
             colunas.forEach(col => {
                 const colDiv = document.createElement('div');
-                colDiv.className = "flex-shrink-0 w-80 flex flex-col";
+                colDiv.className = "flex-shrink-0 w-80 flex flex-col h-full";
                 colDiv.innerHTML = `
                     <div class="flex items-center justify-between mb-4 px-1 header-col">
                         <h3 class="font-black text-gray-400 uppercase text-[11px] tracking-widest">${col.nome}</h3>
                         <span id="badge-${col.id}" class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">0</span>
                     </div>
                     <div id="col-${col.id}" data-status="${col.id}" 
-                         class="kanban-column hide-scrollbar overflow-y-auto max-h-[75vh] pb-40"></div>
+                         class="kanban-column hide-scrollbar pb-10"></div>
                 `;
                 container.appendChild(colDiv);
 
                 const colElement = document.getElementById(`col-${col.id}`);
 
-                // Ativa a mãozinha vertical para a coluna específica
+                // Ativa a mãozinha vertical apenas na coluna interna
                 makeDraggableScroll(colElement, 'y');
 
                 new Sortable(colElement, {
@@ -238,7 +246,7 @@
             });
         }
 
-        // Funções de carregar, criar, deletar e realtime permanecem iguais...
+        // Funções de dados permanecem iguais...
         async function carregarCards() {
             const { data: cards, error } = await _supabase.from('cards').select('*').order('created_at', { ascending: false });
             if (error) return;
@@ -300,7 +308,10 @@
         function atualizarContadores() {
             colunas.forEach(col => {
                 const el = document.getElementById(`col-${col.id}`);
-                if (el) document.getElementById(`badge-${col.id}`).textContent = el.children.length;
+                if (el) {
+                    const badge = document.getElementById(`badge-${col.id}`);
+                    if (badge) badge.textContent = el.children.length;
+                }
             });
         }
 
