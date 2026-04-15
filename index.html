@@ -1202,29 +1202,22 @@
       hoje.setHours(0, 0, 0, 0);
 
       const paraAvisar = allCards.filter(card => {
-        if (!card.data_inicio) return false;
-        if (card.status === 'avisos' || card.status === 'arquivado') return false;
+        if (!card.data_inicio || card.status === 'avisos' || card.status === 'arquivado') return false;
 
         const evento = new Date(card.data_inicio + 'T00:00:00');
         const diasRestantes = (evento - hoje) / (1000 * 60 * 60 * 24);
-        return diasRestantes <= 14;
+
+        // REGRA: Só vai para avisos se estiver entre o dia do evento (0) e 14 dias antes
+        return diasRestantes <= 14 && diasRestantes >= 0;
       });
 
       if (!paraAvisar.length) return;
 
       for (const card of paraAvisar) {
-        const { error } = await db
-          .from('cards')
-          .update({ status: 'avisos' })
-          .eq('id', card.id);
-
-        if (!error) card.status = 'avisos';
+        await db.from('cards').update({ status: 'avisos' }).eq('id', card.id);
+        card.status = 'avisos';
       }
-
       renderAll();
-      initSortable();
-      updateTotalBadge();
-      toast(`⚠️ ${paraAvisar.length} card(s) movido(s) para Avisos automaticamente.`, 'success');
     }
 
     /* ═══════════════════════════════════════════════
@@ -1414,15 +1407,20 @@
         return;
       }
 
-      // 1. Lógica de cálculo dos 14 dias
+      // 1. Lógica de cálculo exata
       const hoje = new Date();
       hoje.setHours(0, 0, 0, 0);
       const evento = new Date(data + 'T00:00:00');
       const diasRestantes = (evento - hoje) / (1000 * 60 * 60 * 24);
 
-      // 2. Define o status inicial baseado na proximidade do evento
+      // 2. Define o status inicial com faixas bem definidas
       let statusInicial = 'solicitacoes';
-      if (diasRestantes <= 14) {
+
+      if (diasRestantes < 0) {
+        // Caso a data seja de ontem ou anterior
+        statusInicial = 'arquivado';
+      } else if (diasRestantes <= 14) {
+        // Caso a data seja entre HOJE e daqui a 14 dias
         statusInicial = 'avisos';
       }
 
@@ -1598,29 +1596,20 @@
       hoje.setHours(0, 0, 0, 0);
 
       const paraArquivar = allCards.filter(card => {
-        if (!card.data_inicio) return false;
-        if (card.status === 'arquivado') return false; // Ignora se já estiver arquivado
+        if (!card.data_inicio || card.status === 'arquivado') return false;
 
         const evento = new Date(card.data_inicio + 'T00:00:00');
-        // Se a data do evento for menor que hoje, ele passou
+        // REGRA: Se a data do evento é menor que HOJE (pelo menos 1 dia de atraso)
         return evento < hoje;
       });
 
       if (!paraArquivar.length) return;
 
       for (const card of paraArquivar) {
-        const { error } = await db
-          .from('cards')
-          .update({ status: 'arquivado' })
-          .eq('id', card.id);
-
-        if (!error) card.status = 'arquivado';
+        await db.from('cards').update({ status: 'arquivado' }).eq('id', card.id);
+        card.status = 'arquivado';
       }
-
       renderAll();
-      initSortable();
-      updateTotalBadge();
-      toast(`📦 ${paraArquivar.length} card(s) antigos foram arquivados.`, 'success');
     }
 
     /* ═══════════════════════════════════════════════
