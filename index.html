@@ -193,15 +193,14 @@
             let startX, startY, scrollLeft, scrollTop;
 
             element.addEventListener('mousedown', (e) => {
-                // Se clicou em um card ou botão, não rola a tela
+                // Se o clique for num card, aborta o drag da tela para o Sortable agir
                 if (e.target.closest('.kanban-card') || e.target.closest('button')) return;
 
                 isDown = true;
                 element.style.cursor = 'grabbing';
 
-                // Captura as posições iniciais (X e Y)
-                startX = e.pageX - element.offsetLeft;
-                startY = e.pageY - element.offsetTop;
+                startX = e.clientX;
+                startY = e.clientY;
                 scrollLeft = element.scrollLeft;
                 scrollTop = element.scrollTop;
             });
@@ -220,12 +219,8 @@
                 if (!isDown) return;
                 e.preventDefault();
 
-                // Calcula o movimento em ambas as direções
-                const x = e.pageX - element.offsetLeft;
-                const y = e.pageY - element.offsetTop;
-
-                const walkX = (x - startX) * 2; // Multiplicador de velocidade horizontal
-                const walkY = (y - startY) * 2; // Multiplicador de velocidade vertical
+                const walkX = (e.clientX - startX) * 1.5; // Velocidade Horizontal
+                const walkY = (e.clientY - startY) * 1.5; // Velocidade Vertical
 
                 element.scrollLeft = scrollLeft - walkX;
                 element.scrollTop = scrollTop - walkY;
@@ -239,30 +234,26 @@
             colunas.forEach(col => {
                 const colDiv = document.createElement('div');
                 colDiv.className = "flex-shrink-0 w-80 flex flex-col";
+                // ADICIONADO: hide-scrollbar e pb-20
                 colDiv.innerHTML = `
                     <div class="flex items-center justify-between mb-4 px-1 header-col">
                         <h3 class="font-black text-gray-400 uppercase text-[11px] tracking-widest">${col.nome}</h3>
                         <span id="badge-${col.id}" class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">0</span>
                     </div>
-                    <div id="col-${col.id}" data-status="${col.id}" class="kanban-column custom-scroll overflow-y-auto max-h-[70vh]"></div>
+                    <div id="col-${col.id}" data-status="${col.id}" class="kanban-column hide-scrollbar overflow-y-auto max-h-[70vh] pb-20"></div>
                 `;
                 container.appendChild(colDiv);
 
                 const colElement = document.getElementById(`col-${col.id}`);
 
-                // Ativa o Drag Scroll Vertical para o interior da coluna
                 makeDraggableScroll(colElement);
 
-                // Configuração do Sortable com a correção (forceFallback)
                 new Sortable(colElement, {
                     group: 'kanban',
                     animation: 200,
                     ghostClass: 'card-placeholder',
-
-                    // --- A MÁGICA ESTÁ AQUI ---
-                    forceFallback: true, // Ignora o Drag nativo do navegador para liberar o Scroll
-                    fallbackClass: "opacity-80", // Estilo do card enquanto arrasta
-
+                    forceFallback: true,
+                    fallbackClass: "opacity-80",
                     scroll: true,
                     scrollSensitivity: 150,
                     scrollSpeed: 30,
