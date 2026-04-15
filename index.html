@@ -2,325 +2,1362 @@
 <html lang="pt-BR">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Criativos - Igreja</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Central de Mídias</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Nunito:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        igreja: { blue: '#0047AB', black: '#111111', gray: '#F3F4F6' }
-                    }
-                }
-            }
-        }
-    </script>
     <style>
-        /* 1. ESCONDER SCROLLBARS MANTENDO A FUNCIONALIDADE */
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            /* IE/Edge */
-            scrollbar-width: none;
-            /* Firefox */
+        :root {
+            --bg: #0b1622;
+            --surface: #111f30;
+            --surface2: #172840;
+            --card-bg: #152238;
+            --card-hover: #1a2d4a;
+            --border: rgba(255, 255, 255, 0.07);
+            --border2: rgba(255, 255, 255, 0.12);
+            --gold: #f4a435;
+            --gold-light: #fbc46a;
+            --text: #dce8f5;
+            --text-muted: #6e8aa8;
+            --text-dim: #3d5570;
+            --green: #34d399;
+            --blue: #60a5fa;
+            --purple: #a78bfa;
+            --pink: #f472b6;
+            --red: #f87171;
+            --orange: #fb923c;
+            --teal: #2dd4bf;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --radius: 12px;
+            --radius-sm: 8px;
         }
 
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-            /* Chrome/Safari */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        /* 2. ESTILO DAS COLUNAS - ESSENCIAL PARA O SCROLL VERTICAL */
-        .kanban-column {
-            min-height: 200px;
-            max-height: 70vh;
-            /* Limita a altura para o scroll interno funcionar */
-            overflow-y: auto;
-            /* Permite scroll vertical */
-            overflow-x: hidden;
-            transition: background-color 0.2s;
-            cursor: grab;
-            user-select: none;
-            -webkit-user-select: none;
-            scroll-behavior: smooth;
-        }
-
-        /* Container Principal - Ajuste para o Scroll Lateral */
-        #kanban-container {
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
             display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ─── HEADER ─────────────────────────────── */
+        header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 28px;
+            height: 62px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            box-shadow: 0 4px 14px rgba(244, 164, 53, .35);
+        }
+
+        .logo h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15rem;
+            letter-spacing: .03em;
+        }
+
+        .logo h1 span {
+            color: var(--gold);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats-badge {
+            font-size: .75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            padding: 5px 12px;
+            border-radius: 20px;
+            letter-spacing: .04em;
+        }
+
+        /* ─── BUTTONS ─────────────────────────────── */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: #1a0e00;
+            border: none;
+            padding: 9px 20px;
+            border-radius: 9px;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 800;
+            font-size: .875rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            transition: all .2s;
+            box-shadow: 0 3px 14px rgba(244, 164, 53, .3);
+            letter-spacing: .01em;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 20px rgba(244, 164, 53, .45);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--surface2);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            padding: 9px 18px;
+            border-radius: 9px;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: .875rem;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .btn-secondary:hover {
+            color: var(--text);
+            border-color: var(--border2);
+        }
+
+        .btn-danger {
+            background: rgba(248, 113, 113, .1);
+            color: var(--red);
+            border: 1px solid rgba(248, 113, 113, .2);
+            padding: 9px 18px;
+            border-radius: 9px;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: .875rem;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .btn-danger:hover {
+            background: rgba(248, 113, 113, .2);
+        }
+
+        /* ─── BOARD ──────────────────────────────── */
+        .board {
+            display: flex;
+            gap: 14px;
+            padding: 18px 24px 18px;
             overflow-x: auto;
-            /* Permite scroll horizontal */
-            overflow-y: hidden;
-            cursor: grab;
-            gap: 1.5rem;
-            padding-bottom: 2rem;
-            min-height: calc(100vh - 150px);
-            width: 100%;
+            flex: 1;
+            align-items: flex-start;
         }
 
-        #kanban-container:active,
-        .kanban-column:active {
-            cursor: grabbing;
+        .board::-webkit-scrollbar {
+            height: 5px;
         }
 
-        .card-placeholder {
-            background: rgba(0, 71, 171, 0.05);
-            border: 2px dashed #0047AB;
-            border-radius: 12px;
-            margin-bottom: 12px;
+        .board::-webkit-scrollbar-track {
+            background: transparent;
         }
 
-        .kanban-card {
+        .board::-webkit-scrollbar-thumb {
+            background: var(--surface2);
+            border-radius: 3px;
+        }
+
+        /* ─── COLUMN ─────────────────────────────── */
+        .column {
+            flex-shrink: 0;
+            width: 272px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: calc(100vh - 98px);
+        }
+
+        .col-header {
+            padding: 11px 14px;
+            border-radius: var(--radius);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .col-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 800;
+            font-size: .78rem;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+
+        .col-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .col-count {
+            background: var(--surface2);
+            color: var(--text-muted);
+            font-size: .72rem;
+            font-weight: 800;
+            padding: 2px 9px;
+            border-radius: 20px;
+        }
+
+        .cards-wrap {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 3px 2px 6px;
+            min-height: 64px;
+        }
+
+        .cards-wrap::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .cards-wrap::-webkit-scrollbar-thumb {
+            background: var(--surface2);
+            border-radius: 2px;
+        }
+
+        /* ─── CARD ───────────────────────────────── */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent, var(--gold));
+            border-radius: var(--radius-sm);
+            padding: 13px 13px 11px;
+            cursor: pointer;
+            transition: background .18s, transform .18s, box-shadow .18s;
+            position: relative;
+        }
+
+        .card:hover {
+            background: var(--card-hover);
+            border-color: var(--border2);
+            border-left-color: var(--accent, var(--gold));
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .card.sortable-ghost {
+            opacity: .25;
+        }
+
+        .card.sortable-chosen {
+            box-shadow: 0 10px 36px rgba(0, 0, 0, .55);
+            transform: scale(1.02) rotate(.5deg);
+        }
+
+        .card-tema {
+            font-weight: 800;
+            font-size: .88rem;
+            margin-bottom: 5px;
+            color: var(--text);
+            line-height: 1.3;
+        }
+
+        .card-meta {
+            font-size: .73rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 3px;
+        }
+
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 9px;
+            padding-top: 9px;
+            border-top: 1px solid var(--border);
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .tag {
+            font-size: .62rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            letter-spacing: .03em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity .2s;
+            flex-shrink: 0;
+            margin-left: 6px;
+        }
+
+        .card:hover .card-actions {
+            opacity: 1;
+        }
+
+        .card-btn {
+            background: var(--surface2);
+            border: none;
+            color: var(--text-muted);
+            width: 24px;
+            height: 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .7rem;
+            transition: all .15s;
+        }
+
+        .card-btn:hover {
+            background: var(--red);
+            color: #fff;
+        }
+
+        .empty-col {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-sm);
+            padding: 18px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: .78rem;
             user-select: none;
-            pointer-events: auto;
-        }
-
-        /* Área do título da coluna */
-        .header-col {
             pointer-events: none;
         }
 
-        .header-col * {
-            pointer-events: auto;
+        /* ─── MODAL ──────────────────────────────── */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .72);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .25s;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal {
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, .1);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 560px;
+            max-height: 92vh;
+            overflow-y: auto;
+            transform: translateY(24px) scale(.97);
+            transition: transform .25s;
+            box-shadow: 0 28px 80px rgba(0, 0, 0, .7);
+        }
+
+        .modal::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .modal::-webkit-scrollbar-thumb {
+            background: var(--surface2);
+            border-radius: 2px;
+        }
+
+        .overlay.active .modal {
+            transform: none;
+        }
+
+        .modal-head {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            z-index: 10;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-title span {
+            color: var(--gold);
+        }
+
+        .modal-x {
+            background: var(--surface2);
+            border: none;
+            color: var(--text-muted);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .15s;
+        }
+
+        .modal-x:hover {
+            background: var(--red);
+            color: #fff;
+        }
+
+        .modal-body {
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .modal-foot {
+            padding: 14px 24px 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ─── FORM ───────────────────────────────── */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        label {
+            font-size: .74rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+
+        label .req {
+            color: var(--gold);
+            margin-left: 2px;
+        }
+
+        input[type=text],
+        input[type=date],
+        input[type=time],
+        select,
+        textarea {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: 'Nunito', sans-serif;
+            font-size: .9rem;
+            padding: 10px 12px;
+            width: 100%;
+            transition: border-color .2s, box-shadow .2s;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(244, 164, 53, .12);
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: var(--text-dim);
+        }
+
+        select option {
+            background: var(--surface2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 78px;
+        }
+
+        .section-label {
+            font-size: .74rem;
+            font-weight: 800;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .checks {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 10px 13px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .check-item:hover {
+            border-color: rgba(244, 164, 53, .35);
+            background: rgba(244, 164, 53, .05);
+        }
+
+        .check-item input[type=checkbox] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--gold);
+            flex-shrink: 0;
+            padding: 0;
+            border-radius: 4px;
+        }
+
+        .check-item label {
+            font-size: .85rem;
+            font-weight: 600;
+            color: var(--text);
+            text-transform: none;
+            letter-spacing: 0;
+            cursor: pointer;
+        }
+
+        /* ─── DETAIL VIEW ─────────────────────────── */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .detail-field {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .detail-field.full {
+            grid-column: 1 / -1;
+        }
+
+        .detail-label {
+            font-size: .72rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+
+        .detail-val {
+            font-size: .88rem;
+            color: var(--text);
+            background: var(--surface2);
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            line-height: 1.5;
+            min-height: 38px;
+        }
+
+        .detail-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 8px 0;
+        }
+
+        /* ─── TOAST ──────────────────────────────── */
+        #toasts {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: .83rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            box-shadow: var(--shadow);
+            animation: toastIn .3s ease;
+            max-width: 290px;
+        }
+
+        .toast.success {
+            border-color: var(--green);
+        }
+
+        .toast.error {
+            border-color: var(--red);
+        }
+
+        @keyframes toastIn {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+
+            to {
+                transform: none;
+                opacity: 1;
+            }
+        }
+
+        /* ─── LOADING ─────────────────────────────── */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 28px 0;
+            color: var(--text-muted);
+            font-size: .8rem;
+            gap: 8px;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ─── CONFIRM DIALOG ─────────────────────── */
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s;
+        }
+
+        .confirm-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .confirm-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 14px;
+            padding: 28px;
+            max-width: 340px;
+            width: 100%;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .confirm-box p {
+            font-size: .95rem;
+            color: var(--text);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .confirm-box strong {
+            color: var(--red);
+        }
+
+        .confirm-btns {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
         }
     </style>
 </head>
 
-<body class="bg-slate-50 min-h-screen font-sans antialiased text-igreja-black">
+<body>
 
-    <nav class="bg-white border-b p-4 sticky top-0 z-50 shadow-sm">
-        <div class="max-w-[1600px] mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-igreja-blue rounded-xl flex items-center justify-center text-white">
-                    <i class="fa-solid fa-layer-group"></i>
-                </div>
-                <h1 class="text-xl font-black text-igreja-blue tracking-tight">MÍDIA HUB</h1>
+    <!-- ─── HEADER ─── -->
+    <header>
+        <div class="logo">
+            <div class="logo-icon">✦</div>
+            <h1>Central de <span>Mídias</span></h1>
+        </div>
+        <div class="header-right">
+            <span class="stats-badge" id="total-badge">— cards</span>
+            <button class="btn-primary" onclick="openNewModal()">＋ Nova Solicitação</button>
+        </div>
+    </header>
+
+    <!-- ─── BOARD ─── -->
+    <div class="board" id="board"></div>
+
+    <!-- ─── MODAL: NOVA SOLICITAÇÃO ─── -->
+    <div class="overlay" id="newOverlay">
+        <div class="modal">
+            <div class="modal-head">
+                <div class="modal-title">✦ <span>Nova Solicitação</span></div>
+                <button class="modal-x" onclick="closeNewModal()">✕</button>
             </div>
-            <button onclick="abrirModal()"
-                class="bg-igreja-blue text-white px-6 py-2.5 rounded-full font-bold hover:bg-blue-800 transition-all shadow-lg active:scale-95">
-                <i class="fa-solid fa-plus mr-2"></i>Nova Solicitação
-            </button>
-        </div>
-    </nav>
+            <div class="modal-body">
 
-    <main class="p-6">
-        <div id="kanban-container" class="hide-scrollbar items-start">
-        </div>
-    </main>
+                <div class="section-label">⬡ Dados do Evento</div>
 
-    <div id="modalForm"
-        class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-[60] flex items-center justify-center p-4">
-        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-8 relative">
-            <button onclick="fecharModal()"
-                class="absolute top-6 right-6 text-gray-400 hover:text-black text-2xl transition-colors">&times;</button>
-            <form id="mediaForm" class="space-y-5" onsubmit="salvarNoSupabase(event)">
-                <h2 class="text-2xl font-black mb-6">Criar Novo Cartão</h2>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Departamento</label>
-                    <input type="text" id="departamento" required
-                        class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 outline-none">
+                <div class="form-group">
+                    <label>Departamento Responsável <span class="req">*</span></label>
+                    <input type="text" id="f-dept" placeholder="Ex: Jovens, Louvor, EBD…" />
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Data</label>
-                        <input type="date" id="dataInicio" required
-                            class="w-full rounded-xl bg-gray-50 p-3 outline-none">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Data do Evento <span class="req">*</span></label>
+                        <input type="date" id="f-data" />
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Horário</label>
-                        <input type="time" id="horario" required class="w-full rounded-xl bg-gray-50 p-3 outline-none">
+                    <div class="form-group">
+                        <label>Horário</label>
+                        <input type="time" id="f-hora" />
                     </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Tema</label>
-                    <input type="text" id="tema" required class="w-full rounded-xl bg-gray-50 p-3 outline-none">
+
+                <div class="form-group">
+                    <label>Tema do Evento <span class="req">*</span></label>
+                    <input type="text" id="f-tema" placeholder="Ex: Culto de Oração, Conferência…" />
                 </div>
-                <button type="submit"
-                    class="w-full bg-igreja-blue text-white font-bold py-4 rounded-2xl hover:bg-blue-800 transition-all">Criar
-                    Cartão</button>
-            </form>
+
+                <div class="form-group">
+                    <label>Nome(s) do(s) Preletor(es)</label>
+                    <input type="text" id="f-preletor" placeholder="Ex: Pr. João Silva" />
+                </div>
+
+                <div class="form-group">
+                    <label>Local do Evento</label>
+                    <input type="text" id="f-local" placeholder="Ex: Templo Principal, Salão…" />
+                </div>
+
+                <div class="section-label">⬡ Opções de Criativo</div>
+                <div class="checks" id="checks-area">
+                    <div class="check-item">
+                        <input type="checkbox" id="m1" value="Banner Telão da Igreja" />
+                        <label for="m1">Banner Telão da Igreja</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="m2" value="Banner Instagram" />
+                        <label for="m2">Banner Instagram</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="m3" value="Banner WhatsApp" />
+                        <label for="m3">Banner WhatsApp</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="m4" value="Vídeo Telão" />
+                        <label for="m4">Vídeo de chamada p/ Telão (combinar com o pastor)</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="m5" value="Stories Instagram" />
+                        <label for="m5">Stories Instagram (a combinar)</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="m6" value="Reels Instagram" />
+                        <label for="m6">Reels Instagram (a combinar)</label>
+                    </div>
+                </div>
+
+                <div class="section-label">⬡ Observações</div>
+                <div class="form-group">
+                    <label>Detalhes adicionais</label>
+                    <textarea id="f-obs"
+                        placeholder="Taxa do evento, materiais necessários, foto do ministro de fora etc. Se não houver, escreva: Não existe."></textarea>
+                </div>
+
+            </div>
+            <div class="modal-foot">
+                <button class="btn-secondary" onclick="closeNewModal()">Cancelar</button>
+                <button class="btn-primary" id="submit-btn" onclick="submitCard()">Criar Solicitação</button>
+            </div>
         </div>
     </div>
 
-    <script>
-        const _supabase = supabase.createClient('https://fuilsqakfhzgadshopan.supabase.co', 'sb_publishable_bhUX3iCEPheSGRs0rcYcDg_u7YEJAfC');
+    <!-- ─── MODAL: DETALHES ─── -->
+    <div class="overlay" id="detailOverlay">
+        <div class="modal">
+            <div class="modal-head">
+                <div class="modal-title">✦ <span id="d-title">Detalhes</span></div>
+                <button class="modal-x" onclick="closeDetailModal()">✕</button>
+            </div>
+            <div class="modal-body" id="d-body"></div>
+            <div class="modal-foot">
+                <button class="btn-danger" onclick="confirmDelete()">🗑 Excluir</button>
+                <button class="btn-secondary" onclick="closeDetailModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
 
-        const colunas = [
-            { id: 'solicitacoes', nome: '📥 Solicitações' },
-            { id: 'analise', nome: '🔎 Alinhamento' },
-            { id: 'producao', nome: '🎨 Produção' },
-            { id: 'revisao', nome: '👀 Revisão' },
-            { id: 'pronto', nome: '✅ Pronto' },
-            { id: 'programado', nome: '📢 Programado' },
-            { id: 'arquivado', nome: '🗂️ Arquivado' }
+    <!-- ─── CONFIRM DIALOG ─── -->
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-box">
+            <p>Deseja realmente <strong>excluir</strong> este card?<br>Esta ação não pode ser desfeita.</p>
+            <div class="confirm-btns">
+                <button class="btn-secondary" onclick="closeConfirm()">Cancelar</button>
+                <button class="btn-danger" onclick="doDelete()">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toasts"></div>
+
+    <script>
+        /* ═══════════════════════════════════════════════
+           CONFIG
+        ═══════════════════════════════════════════════ */
+        const SUPABASE_URL = 'https://fuilsqakfhzgadshopan.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_bhUX3iCEPheSGRs0rcYcDg_u7YEJAfC';
+
+        const { createClient } = supabase;
+        const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const COLUMNS = [
+            { id: 'solicitacoes', label: 'Solicitações', color: '#60a5fa' },
+            { id: 'demanda_espera', label: 'Demanda em Espera', color: '#a78bfa' },
+            { id: 'em_producao', label: 'Em Produção', color: '#fb923c' },
+            { id: 'revisao', label: 'Revisão', color: '#f472b6' },
+            { id: 'pronto', label: 'Pronto', color: '#34d399' },
+            { id: 'programado', label: 'Programado', color: '#f4a435' },
+            { id: 'arquivado', label: 'Arquivado', color: '#4a6080' },
         ];
 
-        document.addEventListener('DOMContentLoaded', () => {
-            renderizarColunas();
-            carregarCards();
-            ativarRealtime();
+        const TAG_STYLE = {
+            'Banner Telão da Igreja': { bg: '#1a3460', fg: '#60a5fa' },
+            'Banner Instagram': { bg: '#3a1a40', fg: '#e879f9' },
+            'Banner WhatsApp': { bg: '#0f3020', fg: '#34d399' },
+            'Vídeo Telão': { bg: '#3a2210', fg: '#fb923c' },
+            'Stories Instagram': { bg: '#3a102a', fg: '#f472b6' },
+            'Reels Instagram': { bg: '#2a0f20', fg: '#f87171' },
+        };
 
-            // Scroll lateral do container principal
-            const mainContainer = document.getElementById('kanban-container');
-            makeDraggableScroll(mainContainer, 'x');
-        });
+        const TAG_SHORT = {
+            'Banner Telão da Igreja': 'Telão',
+            'Banner Instagram': 'IG',
+            'Banner WhatsApp': 'WA',
+            'Vídeo Telão': 'Vídeo',
+            'Stories Instagram': 'Stories',
+            'Reels Instagram': 'Reels',
+        };
 
-        // --- FUNÇÃO DE DRAG SCROLL CORRIGIDA ---
-        function makeDraggableScroll(element, axis = 'both') {
-            let isDown = false;
-            let startX, startY, scrollLeft, scrollTop;
+        let allCards = [];
+        let sortables = [];
+        let currentId = null;
 
-            element.addEventListener('mousedown', (e) => {
-                // Não inicia o drag se clicar em cards ou botões para não atrapalhar o SortableJS ou cliques
-                if (e.target.closest('.kanban-card') || e.target.closest('button') || e.target.closest('input')) return;
+        /* ═══════════════════════════════════════════════
+           INIT
+        ═══════════════════════════════════════════════ */
+        async function init() {
+            buildBoard();
+            await loadCards();
+        }
 
-                isDown = true;
-                element.classList.add('active'); // CSS opcional para feedback
-
-                startX = e.pageX - element.offsetLeft;
-                startY = e.pageY - element.offsetTop;
-                scrollLeft = element.scrollLeft;
-                scrollTop = element.scrollTop;
-            });
-
-            element.addEventListener('mouseleave', () => { isDown = false; });
-            element.addEventListener('mouseup', () => { isDown = false; });
-
-            element.addEventListener('mousemove', (e) => {
-                if (!isDown) return;
-
-                // e.preventDefault() aqui evita que o navegador selecione texto enquanto você arrasta
-                e.preventDefault();
-
-                if (axis === 'x' || axis === 'both') {
-                    const x = e.pageX - element.offsetLeft;
-                    const walkX = (x - startX) * 2; // Velocidade do scroll
-                    element.scrollLeft = scrollLeft - walkX;
-                }
-
-                if (axis === 'y' || axis === 'both') {
-                    const y = e.pageY - element.offsetTop;
-                    const walkY = (y - startY) * 2;
-                    element.scrollTop = scrollTop - walkY;
-                }
+        /* ═══════════════════════════════════════════════
+           BUILD BOARD SKELETON
+        ═══════════════════════════════════════════════ */
+        function buildBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            COLUMNS.forEach(col => {
+                const el = document.createElement('div');
+                el.className = 'column';
+                el.dataset.status = col.id;
+                el.innerHTML = `
+      <div class="col-header">
+        <div class="col-title">
+          <span class="col-dot" style="background:${col.color}"></span>${col.label}
+        </div>
+        <span class="col-count" id="cnt-${col.id}">0</span>
+      </div>
+      <div class="cards-wrap" id="col-${col.id}">
+        <div class="loading"><div class="spinner"></div> Carregando…</div>
+      </div>`;
+                board.appendChild(el);
             });
         }
 
-        function renderizarColunas() {
-            const container = document.getElementById('kanban-container');
-            container.innerHTML = '';
+        /* ═══════════════════════════════════════════════
+           LOAD CARDS FROM SUPABASE
+        ═══════════════════════════════════════════════ */
+        async function loadCards() {
+            const { data, error } = await db
+                .from('cards')
+                .select('*')
+                .order('posicao', { ascending: true })
+                .order('created_at', { ascending: true });
 
-            colunas.forEach(col => {
-                const colDiv = document.createElement('div');
-                colDiv.className = "flex-shrink-0 w-80 flex flex-col h-full";
-                colDiv.innerHTML = `
-                    <div class="flex items-center justify-between mb-4 px-1 header-col">
-                        <h3 class="font-black text-gray-400 uppercase text-[11px] tracking-widest">${col.nome}</h3>
-                        <span id="badge-${col.id}" class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">0</span>
-                    </div>
-                    <div id="col-${col.id}" data-status="${col.id}" 
-                         class="kanban-column hide-scrollbar pb-10"></div>
-                `;
-                container.appendChild(colDiv);
+            if (error) { toast('Erro ao carregar dados: ' + error.message, 'error'); return; }
 
-                const colElement = document.getElementById(`col-${col.id}`);
+            allCards = data || [];
+            renderAll();
+            initSortable();
+            updateTotalBadge();
+        }
 
-                // Ativa a mãozinha vertical apenas na coluna interna
-                makeDraggableScroll(colElement, 'y');
+        /* ═══════════════════════════════════════════════
+           RENDER ALL COLUMNS
+        ═══════════════════════════════════════════════ */
+        function renderAll() {
+            const grouped = {};
+            COLUMNS.forEach(c => { grouped[c.id] = []; });
+            allCards.forEach(card => {
+                const s = card.status || 'solicitacoes';
+                if (grouped[s]) grouped[s].push(card);
+            });
 
-                new Sortable(colElement, {
-                    group: 'kanban',
+            COLUMNS.forEach(col => {
+                const wrap = document.getElementById(`col-${col.id}`);
+                const count = document.getElementById(`cnt-${col.id}`);
+                const cards = grouped[col.id];
+                wrap.innerHTML = '';
+                count.textContent = cards.length;
+
+                if (!cards.length) {
+                    wrap.innerHTML = '<div class="empty-col">Sem cards aqui</div>';
+                    return;
+                }
+                cards.forEach(card => wrap.appendChild(makeCardEl(card, col.color)));
+            });
+        }
+
+        /* ═══════════════════════════════════════════════
+           MAKE CARD ELEMENT
+        ═══════════════════════════════════════════════ */
+        function makeCardEl(card, accentColor) {
+            const el = document.createElement('div');
+            el.className = 'card';
+            el.dataset.id = card.id;
+            el.style.setProperty('--accent', accentColor || '#f4a435');
+
+            const materiais = Array.isArray(card.materiais) ? card.materiais : [];
+            const tagsHtml = materiais.slice(0, 4).map(m => {
+                const s = TAG_STYLE[m] || { bg: '#1e2d40', fg: '#aaa' };
+                return `<span class="tag" style="background:${s.bg};color:${s.fg}">${TAG_SHORT[m] || m}</span>`;
+            }).join('');
+
+            const dateStr = card.data_inicio ? fmtDate(card.data_inicio) : '—';
+            const hora = card.horario ? ' · ' + card.horario.substring(0, 5) : '';
+
+            el.innerHTML = `
+    <div class="card-tema">${esc(card.tema || 'Sem tema')}</div>
+    <div class="card-meta">🏛 ${esc(card.departamento || '—')}</div>
+    <div class="card-meta">📅 ${dateStr}${hora}</div>
+    ${card.preletor ? `<div class="card-meta">🎙 ${esc(card.preletor)}</div>` : ''}
+    <div class="card-footer">
+      <div class="card-tags">${tagsHtml}</div>
+      <div class="card-actions">
+        <button class="card-btn" title="Excluir" onclick="askDelete(event,'${card.id}')">🗑</button>
+      </div>
+    </div>`;
+
+            el.addEventListener('click', e => {
+                if (e.target.closest('.card-btn')) return;
+                openDetail(card.id);
+            });
+            return el;
+        }
+
+        /* ═══════════════════════════════════════════════
+           SORTABLE (drag & drop)
+        ═══════════════════════════════════════════════ */
+        function initSortable() {
+            sortables.forEach(s => s.destroy());
+            sortables = [];
+
+            COLUMNS.forEach(col => {
+                const wrap = document.getElementById(`col-${col.id}`);
+                const inst = Sortable.create(wrap, {
+                    group: 'cards',
                     animation: 200,
-                    ghostClass: 'card-placeholder',
-                    onEnd: async (evt) => {
-                        const cardId = evt.item.dataset.id;
-                        const novoStatus = evt.to.dataset.status;
-                        await atualizarStatusCard(cardId, novoStatus);
+                    ghostClass: 'sortable-ghost',
+                    chosenClass: 'sortable-chosen',
+                    filter: '.empty-col',
+                    onEnd: async evt => {
+                        const id = evt.item.dataset.id;
+                        const newStatus = evt.to.closest('.column').dataset.status;
+                        const newPos = evt.newIndex;
+
+                        // Update local state immediately
+                        const card = allCards.find(c => c.id === id);
+                        if (card) card.status = newStatus;
+
+                        // Re-render counts & empty states without full rebuild
+                        updateCounts();
+
+                        // Persist to Supabase
+                        const { error } = await db
+                            .from('cards')
+                            .update({ status: newStatus, posicao: newPos })
+                            .eq('id', id);
+
+                        if (error) toast('Erro ao mover card', 'error');
+                        else toast('Card movido com sucesso!', 'success');
                     }
                 });
+                sortables.push(inst);
             });
         }
 
-        // Funções de dados permanecem iguais...
-        async function carregarCards() {
-            const { data: cards, error } = await _supabase.from('cards').select('*').order('created_at', { ascending: false });
-            if (error) return;
-            document.querySelectorAll('.kanban-column').forEach(el => el.innerHTML = '');
-            cards.forEach(card => {
-                const cardEl = criarElementoCard(card);
-                const coluna = document.getElementById(`col-${card.status}`);
-                if (coluna) coluna.appendChild(cardEl);
+        function updateCounts() {
+            const cnt = {};
+            COLUMNS.forEach(c => { cnt[c.id] = 0; });
+            allCards.forEach(c => {
+                const s = c.status || 'solicitacoes';
+                if (cnt[s] !== undefined) cnt[s]++;
             });
-            atualizarContadores();
+            COLUMNS.forEach(c => {
+                const el = document.getElementById(`cnt-${c.id}`);
+                if (el) el.textContent = cnt[c.id];
+            });
+            updateTotalBadge();
         }
 
-        function criarElementoCard(card) {
-            const div = document.createElement('div');
-            div.className = 'kanban-card bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-4 cursor-grab active:cursor-grabbing hover:shadow-md transition-all group relative';
-            div.dataset.id = card.id;
-            const dataFmt = card.data_inicio ? new Date(card.data_inicio + 'T00:00:00').toLocaleDateString('pt-BR') : '--/--/--';
-            const materiaisHtml = (card.materiais || []).map(m => `<span class="bg-blue-50 text-blue-600 text-[9px] px-2 py-0.5 rounded-md font-bold uppercase tracking-tighter">${m}</span>`).join(' ');
-
-            div.innerHTML = `
-                <div class="flex justify-between items-start mb-3">
-                    <span class="text-[9px] font-black text-white bg-igreja-blue px-2 py-0.5 rounded-full uppercase">${card.departamento || 'Geral'}</span>
-                    <button onclick="removerCard('${card.id}')" class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all"><i class="fa-solid fa-trash-can text-xs"></i></button>
-                </div>
-                <h4 class="font-bold text-sm text-gray-800 leading-tight mb-2">${card.tema}</h4>
-                <div class="flex items-center gap-3 text-[10px] text-gray-400 mb-4">
-                    <span><i class="fa-regular fa-calendar mr-1"></i> ${dataFmt}</span>
-                    <span><i class="fa-regular fa-clock mr-1"></i> ${card.horario ? card.horario.substring(0, 5) : '--:--'}</span>
-                </div>
-                <div class="flex flex-wrap gap-1.5">${materiaisHtml}</div>
-            `;
-            return div;
+        function updateTotalBadge() {
+            const active = allCards.filter(c => c.status !== 'arquivado').length;
+            document.getElementById('total-badge').textContent =
+                `${allCards.length} card${allCards.length !== 1 ? 's' : ''} · ${active} ativos`;
         }
 
-        async function salvarNoSupabase(e) {
-            e.preventDefault();
-            const { error } = await _supabase.from('cards').insert([{
-                departamento: document.getElementById('departamento').value,
-                data_inicio: document.getElementById('dataInicio').value,
-                horario: document.getElementById('horario').value,
-                tema: document.getElementById('tema').value,
-                status: 'solicitacoes'
-            }]);
-            if (!error) { fecharModal(); document.getElementById('mediaForm').reset(); carregarCards(); }
+        /* ═══════════════════════════════════════════════
+           NEW CARD MODAL
+        ═══════════════════════════════════════════════ */
+        function openNewModal() {
+            document.getElementById('newOverlay').classList.add('active');
+            document.getElementById('f-dept').focus();
         }
 
-        async function atualizarStatusCard(id, novoStatus) {
-            await _supabase.from('cards').update({ status: novoStatus }).eq('id', id);
-            atualizarContadores();
+        function closeNewModal() {
+            document.getElementById('newOverlay').classList.remove('active');
+            clearForm();
         }
 
-        async function removerCard(id) {
-            if (confirm("Apagar cartão?")) {
-                await _supabase.from('cards').delete().eq('id', id);
-                carregarCards();
+        function clearForm() {
+            ['f-dept', 'f-data', 'f-hora', 'f-tema', 'f-preletor', 'f-local', 'f-obs'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            ['m1', 'm2', 'm3', 'm4', 'm5', 'm6'].forEach(id => {
+                document.getElementById(id).checked = false;
+            });
+            document.getElementById('submit-btn').disabled = false;
+            document.getElementById('submit-btn').textContent = 'Criar Solicitação';
+        }
+
+        async function submitCard() {
+            const dept = document.getElementById('f-dept').value.trim();
+            const tema = document.getElementById('f-tema').value.trim();
+            const data = document.getElementById('f-data').value;
+
+            if (!dept || !tema || !data) {
+                toast('Preencha os campos obrigatórios (*)', 'error');
+                return;
             }
+
+            const checks = document.querySelectorAll('#checks-area input[type=checkbox]:checked');
+            const materiais = Array.from(checks).map(c => c.value);
+
+            const posicao = allCards.filter(c => c.status === 'solicitacoes').length;
+
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'Criando…';
+
+            const payload = {
+                departamento: dept,
+                tema,
+                data_inicio: data,
+                horario: document.getElementById('f-hora').value || null,
+                preletor: document.getElementById('f-preletor').value.trim() || null,
+                local: document.getElementById('f-local').value.trim() || null,
+                observacoes: document.getElementById('f-obs').value.trim() || null,
+                materiais: materiais.length ? materiais : null,
+                status: 'solicitacoes',
+                posicao,
+            };
+
+            const { data: newCard, error } = await db.from('cards').insert(payload).select().single();
+
+            if (error) {
+                toast('Erro ao criar: ' + error.message, 'error');
+                btn.disabled = false;
+                btn.textContent = 'Criar Solicitação';
+                return;
+            }
+
+            allCards.push(newCard);
+
+            // Add card to DOM without full re-render
+            const wrap = document.getElementById('col-solicitacoes');
+            const col = COLUMNS.find(c => c.id === 'solicitacoes');
+            const empty = wrap.querySelector('.empty-col');
+            if (empty) wrap.innerHTML = '';
+            wrap.appendChild(makeCardEl(newCard, col.color));
+
+            updateCounts();
+            closeNewModal();
+            toast('Solicitação criada com sucesso! ✓', 'success');
         }
 
-        function atualizarContadores() {
-            colunas.forEach(col => {
-                const el = document.getElementById(`col-${col.id}`);
-                if (el) {
-                    const badge = document.getElementById(`badge-${col.id}`);
-                    if (badge) badge.textContent = el.children.length;
+        /* ═══════════════════════════════════════════════
+           DETAIL MODAL
+        ═══════════════════════════════════════════════ */
+        function openDetail(id) {
+            const card = allCards.find(c => c.id === id);
+            if (!card) return;
+            currentId = id;
+
+            document.getElementById('d-title').textContent = card.tema || 'Detalhes';
+
+            const materiais = Array.isArray(card.materiais) ? card.materiais : [];
+            const tagsHtml = materiais.map(m => {
+                const s = TAG_STYLE[m] || { bg: '#1e2d40', fg: '#aaa' };
+                return `<span class="tag" style="background:${s.bg};color:${s.fg};font-size:.74rem;padding:4px 9px">${m}</span>`;
+            }).join('');
+
+            const statusOpts = COLUMNS.map(c =>
+                `<option value="${c.id}" ${card.status === c.id ? 'selected' : ''}>${c.label}</option>`
+            ).join('');
+
+            document.getElementById('d-body').innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-field">
+        <div class="detail-label">Departamento</div>
+        <div class="detail-val">${esc(card.departamento || '—')}</div>
+      </div>
+      <div class="detail-field">
+        <div class="detail-label">Data do Evento</div>
+        <div class="detail-val">${fmtDate(card.data_inicio)}</div>
+      </div>
+      <div class="detail-field full">
+        <div class="detail-label">Tema</div>
+        <div class="detail-val">${esc(card.tema || '—')}</div>
+      </div>
+      <div class="detail-field">
+        <div class="detail-label">Horário</div>
+        <div class="detail-val">${card.horario ? card.horario.substring(0, 5) : '—'}</div>
+      </div>
+      <div class="detail-field">
+        <div class="detail-label">Local</div>
+        <div class="detail-val">${esc(card.local || '—')}</div>
+      </div>
+      <div class="detail-field full">
+        <div class="detail-label">Preletor(es)</div>
+        <div class="detail-val">${esc(card.preletor || '—')}</div>
+      </div>
+      ${materiais.length ? `
+      <div class="detail-field full">
+        <div class="detail-label">Materiais Solicitados</div>
+        <div class="detail-tags">${tagsHtml}</div>
+      </div>` : ''}
+      <div class="detail-field full">
+        <div class="detail-label">Observações</div>
+        <div class="detail-val" style="white-space:pre-wrap">${esc(card.observacoes || '—')}</div>
+      </div>
+      <div class="detail-field full">
+        <div class="detail-label">Mover para coluna</div>
+        <select onchange="moveCard('${card.id}', this.value)">${statusOpts}</select>
+      </div>
+    </div>`;
+
+            document.getElementById('detailOverlay').classList.add('active');
+        }
+
+        async function moveCard(id, newStatus) {
+            const { error } = await db.from('cards').update({ status: newStatus }).eq('id', id);
+            if (error) { toast('Erro ao mover: ' + error.message, 'error'); return; }
+
+            const card = allCards.find(c => c.id === id);
+            if (card) card.status = newStatus;
+
+            renderAll();
+            initSortable();
+            updateTotalBadge();
+            toast('Status atualizado!', 'success');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailOverlay').classList.remove('active');
+            currentId = null;
+        }
+
+        /* ═══════════════════════════════════════════════
+           DELETE
+        ═══════════════════════════════════════════════ */
+        function askDelete(e, id) {
+            e.stopPropagation();
+            currentId = id;
+            openConfirm();
+        }
+
+        function confirmDelete() { openConfirm(); }
+
+        function openConfirm() { document.getElementById('confirmOverlay').classList.add('active'); }
+        function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('active'); }
+
+        async function doDelete() {
+            if (!currentId) return;
+            const { error } = await db.from('cards').delete().eq('id', currentId);
+            closeConfirm();
+            if (error) { toast('Erro ao excluir: ' + error.message, 'error'); return; }
+
+            allCards = allCards.filter(c => c.id !== currentId);
+            renderAll();
+            initSortable();
+            updateTotalBadge();
+            closeDetailModal();
+            toast('Card excluído.', 'success');
+            currentId = null;
+        }
+
+        /* ═══════════════════════════════════════════════
+           UTILITIES
+        ═══════════════════════════════════════════════ */
+        function fmtDate(d) {
+            if (!d) return '—';
+            const [y, m, day] = d.split('-');
+            return `${day}/${m}/${y}`;
+        }
+
+        function esc(str) {
+            if (!str) return str;
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function toast(msg, type = 'success') {
+            const c = document.getElementById('toasts');
+            const t = document.createElement('div');
+            t.className = `toast ${type}`;
+            t.innerHTML = `<span>${type === 'success' ? '✓' : '✕'}</span> ${msg}`;
+            c.appendChild(t);
+            setTimeout(() => t.remove(), 3500);
+        }
+
+        /* ─── Close on overlay click ─── */
+        ['newOverlay', 'detailOverlay'].forEach(id => {
+            document.getElementById(id).addEventListener('click', e => {
+                if (e.target === e.currentTarget) {
+                    if (id === 'newOverlay') closeNewModal();
+                    else closeDetailModal();
                 }
             });
-        }
+        });
+        document.getElementById('confirmOverlay').addEventListener('click', e => {
+            if (e.target === e.currentTarget) closeConfirm();
+        });
 
-        function ativarRealtime() {
-            _supabase.channel('schema-db-changes').on('postgres_changes', { event: '*', schema: 'public', table: 'cards' }, () => carregarCards()).subscribe();
-        }
+        /* ─── Keyboard shortcuts ─── */
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                closeConfirm();
+                closeDetailModal();
+                closeNewModal();
+            }
+        });
 
-        function abrirModal() { document.getElementById('modalForm').classList.remove('hidden'); }
-        function fecharModal() { document.getElementById('modalForm').classList.add('hidden'); }
+        /* ─── BOOT ─── */
+        init();
     </script>
 </body>
 
