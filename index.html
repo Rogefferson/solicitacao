@@ -48,43 +48,41 @@
             border-radius: 10px;
         }
 
-        /* Estilos vitais para o Drag Scroll funcionar */
+        /* Container Principal */
         #kanban-container {
             display: flex;
             overflow-x: auto;
             overflow-y: hidden;
             cursor: grab;
             user-select: none;
-            /* Impede seleção de texto ao arrastar */
             -webkit-user-select: none;
             scroll-behavior: auto;
-            /* Evita que o navegador tente arrastar o container como imagem */
-            -webkit-user-drag: none;
+            gap: 1.5rem;
+            padding-bottom: 1.5rem;
         }
 
         #kanban-container:active {
             cursor: grabbing;
         }
 
-        /* Impede que os elementos internos interfiram no clique do drag */
-        .flex-shrink-0,
-        h3,
-        span {
+        /* Garante que os cards não herdem o 'none' de seleção do pai */
+        .kanban-card {
+            user-select: auto;
+            pointer-events: auto;
+        }
+
+        /* Bloqueio de seleção apenas em áreas de drag da tela */
+        .header-col {
             pointer-events: none;
         }
 
-        /* Mas permite que a coluna e os cards recebam eventos (para o Sortable e Scroll) */
-        .kanban-column,
-        .kanban-column *,
-        button,
-        input,
-        textarea {
+        .header-col * {
             pointer-events: auto;
         }
     </style>
 </head>
 
-<body class="bg-slate-50 min-h-screen font-sans antialiased text-igreja-black overflow-hidden">
+<body class="bg-slate-50 min-h-screen font-sans antialiased text-igreja-black">
 
     <nav class="bg-white border-b p-4 sticky top-0 z-50 shadow-sm">
         <div class="max-w-[1600px] mx-auto flex justify-between items-center">
@@ -101,9 +99,8 @@
         </div>
     </nav>
 
-    <main class="p-6 overflow-hidden">
-        <div id="kanban-container" class="flex gap-6 pb-6 custom-scroll items-start"
-            style="min-height: calc(100vh - 120px);">
+    <main class="p-6">
+        <div id="kanban-container" class="custom-scroll items-start" style="min-height: calc(100vh - 120px);">
         </div>
     </main>
 
@@ -111,36 +108,52 @@
         class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-[60] flex items-center justify-center p-4">
         <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-8 relative">
             <button onclick="fecharModal()"
-                class="absolute top-6 right-6 text-gray-400 hover:text-black text-2xl">&times;</button>
+                class="absolute top-6 right-6 text-gray-400 hover:text-black text-2xl transition-colors">&times;</button>
             <form id="mediaForm" class="space-y-5" onsubmit="salvarNoSupabase(event)">
-                <h2 class="text-2xl font-black mb-6">Novo Cartão</h2>
-                <input type="text" id="departamento" required
-                    class="w-full rounded-xl bg-gray-50 p-3 outline-none focus:ring-2 focus:ring-igreja-blue"
-                    placeholder="Departamento">
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="date" id="dataInicio" required class="w-full rounded-xl bg-gray-50 p-3 outline-none">
-                    <input type="time" id="horario" required class="w-full rounded-xl bg-gray-50 p-3 outline-none">
+                <h2 class="text-2xl font-black mb-6">Criar Novo Cartão</h2>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Departamento</label>
+                    <input type="text" id="departamento" required
+                        class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 focus:ring-2 focus:ring-igreja-blue outline-none">
                 </div>
-                <input type="text" id="tema" required class="w-full rounded-xl bg-gray-50 p-3 outline-none"
-                    placeholder="Tema">
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="text" id="preletor" class="w-full rounded-xl bg-gray-50 p-3 outline-none"
-                        placeholder="Preletor">
-                    <input type="text" id="local" class="w-full rounded-xl bg-gray-50 p-3 outline-none"
-                        placeholder="Local">
-                </div>
-                <div class="bg-gray-50 p-4 rounded-xl">
-                    <div class="grid grid-cols-2 gap-2">
-                        <label><input type="checkbox" name="arte" value="Feed"> Feed</label>
-                        <label><input type="checkbox" name="arte" value="Stories"> Stories</label>
-                        <label><input type="checkbox" name="arte" value="Telão"> Telão</label>
-                        <label><input type="checkbox" name="arte" value="Vídeo"> Vídeo</label>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Data</label>
+                        <input type="date" id="dataInicio" required
+                            class="w-full rounded-xl bg-gray-50 p-3 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Horário</label>
+                        <input type="time" id="horario" required class="w-full rounded-xl bg-gray-50 p-3 outline-none">
                     </div>
                 </div>
-                <textarea id="observacoes" class="w-full rounded-xl bg-gray-50 p-3 outline-none"
-                    placeholder="Observações"></textarea>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Tema</label>
+                    <input type="text" id="tema" required class="w-full rounded-xl bg-gray-50 p-3 outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="text" id="preletor" placeholder="Preletor"
+                        class="w-full rounded-xl bg-gray-50 p-3 outline-none">
+                    <input type="text" id="local" placeholder="Local"
+                        class="w-full rounded-xl bg-gray-50 p-3 outline-none">
+                </div>
+                <div class="bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                    <p class="text-xs font-bold mb-3 text-gray-400 uppercase">Materiais</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="text-sm flex items-center gap-2 cursor-pointer"><input type="checkbox" name="arte"
+                                value="Feed"> Feed IG</label>
+                        <label class="text-sm flex items-center gap-2 cursor-pointer"><input type="checkbox" name="arte"
+                                value="Stories"> Stories</label>
+                        <label class="text-sm flex items-center gap-2 cursor-pointer"><input type="checkbox" name="arte"
+                                value="Telão"> Banner Telão</label>
+                        <label class="text-sm flex items-center gap-2 cursor-pointer"><input type="checkbox" name="arte"
+                                value="Vídeo"> Vídeo Chamada</label>
+                    </div>
+                </div>
+                <textarea id="observacoes" rows="2" class="w-full rounded-xl bg-gray-50 p-3 outline-none"
+                    placeholder="Observações..."></textarea>
                 <button type="submit" id="btnSalvar"
-                    class="w-full bg-igreja-blue text-white font-bold py-4 rounded-2xl hover:bg-blue-800">Criar
+                    class="w-full bg-igreja-blue text-white font-bold py-4 rounded-2xl hover:bg-blue-800 transition-all">Criar
                     Cartão</button>
             </form>
         </div>
@@ -166,7 +179,7 @@
             initDragScroll();
         });
 
-        // --- FUNÇÃO DE ARRASTAR MELHORADA ---
+        // 1. FUNÇÃO: ARRASTAR TELA COM O MOUSE (MÃOZINHA)
         function initDragScroll() {
             const slider = document.getElementById('kanban-container');
             let isDown = false;
@@ -174,27 +187,24 @@
             let scrollLeft;
 
             slider.addEventListener('mousedown', (e) => {
-                // Se clicar em um card ou botão, não inicia o scroll da tela
-                if (e.target.closest('.bg-white.p-5') || e.target.closest('button')) return;
-
+                if (e.target.closest('.kanban-card') || e.target.closest('button')) return;
                 isDown = true;
-                slider.classList.add('active');
                 startX = e.pageX - slider.offsetLeft;
                 scrollLeft = slider.scrollLeft;
             });
 
-            slider.addEventListener('mouseleave', () => { isDown = false; });
-            slider.addEventListener('mouseup', () => { isDown = false; });
-
+            slider.addEventListener('mouseleave', () => isDown = false);
+            slider.addEventListener('mouseup', () => isDown = false);
             slider.addEventListener('mousemove', (e) => {
                 if (!isDown) return;
                 e.preventDefault();
                 const x = e.pageX - slider.offsetLeft;
-                const walk = (x - startX) * 2.5; // Aumentei a velocidade para 2.5
+                const walk = (x - startX) * 2;
                 slider.scrollLeft = scrollLeft - walk;
             });
         }
 
+        // 2. RENDERIZAÇÃO E CONFIGURAÇÃO DO SORTABLE
         function renderizarColunas() {
             const container = document.getElementById('kanban-container');
             container.innerHTML = '';
@@ -211,14 +221,22 @@
                 `;
                 container.appendChild(colDiv);
 
+                // Configuração do Sortable com Auto-Scroll Lateral Corrigido
                 new Sortable(document.getElementById(`col-${col.id}`), {
                     group: 'kanban',
                     animation: 200,
                     ghostClass: 'card-placeholder',
+
+                    // Ajustes para o card mover a tela
                     scroll: true,
-                    scrollSensitivity: 100,
-                    scrollSpeed: 20,
-                    bubbleScroll: true,
+                    scrollSensitivity: 150, // Sensibilidade alta para detectar bordas
+                    scrollSpeed: 30,
+                    bubbleScroll: true, // Crucial para o scroll subir para o container pai
+                    setData: function (dataTransfer, dragEl) {
+                        // Evita fantasmas estranhos no drag
+                        dataTransfer.setDragImage(dragEl, 0, 0);
+                    },
+
                     onEnd: async (evt) => {
                         const cardId = evt.item.dataset.id;
                         const novoStatus = evt.to.dataset.status;
@@ -228,6 +246,7 @@
             });
         }
 
+        // 3. FUNÇÕES DO SUPABASE (CARREGAR, SALVAR, REMOVER)
         async function carregarCards() {
             const { data: cards, error } = await _supabase.from('cards').select('*').order('created_at', { ascending: false });
             if (error) return;
@@ -242,10 +261,11 @@
 
         function criarElementoCard(card) {
             const div = document.createElement('div');
-            div.className = 'bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-4 cursor-grab active:cursor-grabbing hover:shadow-md transition-all group relative';
+            div.className = 'kanban-card bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-4 cursor-grab active:cursor-grabbing hover:shadow-md transition-all group relative';
             div.dataset.id = card.id;
             const dataFmt = card.data_inicio ? new Date(card.data_inicio + 'T00:00:00').toLocaleDateString('pt-BR') : '--/--/--';
             const materiaisHtml = (card.materiais || []).map(m => `<span class="bg-blue-50 text-blue-600 text-[9px] px-2 py-0.5 rounded-md font-bold uppercase tracking-tighter">${m}</span>`).join(' ');
+
             div.innerHTML = `
                 <div class="flex justify-between items-start mb-3">
                     <span class="text-[9px] font-black text-white bg-igreja-blue px-2 py-0.5 rounded-full uppercase">${card.departamento || 'Geral'}</span>
@@ -284,7 +304,10 @@
         }
 
         async function removerCard(id) {
-            if (confirm("Apagar cartão?")) { await _supabase.from('cards').delete().eq('id', id); carregarCards(); }
+            if (confirm("Apagar cartão permanentemente?")) {
+                await _supabase.from('cards').delete().eq('id', id);
+                carregarCards();
+            }
         }
 
         function atualizarContadores() {
