@@ -25,6 +25,12 @@
         .kanban-column {
             min-height: 600px;
             transition: background-color 0.2s;
+            cursor: grab;
+            /* Adicionado para a coluna ter a mãozinha também */
+        }
+
+        .kanban-column:active {
+            cursor: grabbing;
         }
 
         .card-placeholder {
@@ -51,8 +57,8 @@
         /* Container Principal */
         #kanban-container {
             display: flex;
-            overflow-x: auto;
-            overflow-y: hidden;
+            overflow: auto;
+            /* Modificado para permitir scroll vertical e horizontal */
             cursor: grab;
             user-select: none;
             -webkit-user-select: none;
@@ -176,35 +182,56 @@
             renderizarColunas();
             carregarCards();
             ativarRealtime();
-            initDragScroll();
+
+            // Ativa o scroll horizontal/vertical global no container de fundo
+            makeDraggableScroll(document.getElementById('kanban-container'));
         });
 
-        // 1. FUNÇÃO: ARRASTAR TELA COM O MOUSE (MÃOZINHA)
-        function initDragScroll() {
-            const slider = document.getElementById('kanban-container');
+        // --- NOVA FUNÇÃO DE DRAG SCROLL 2D (X e Y) ---
+        function makeDraggableScroll(element) {
             let isDown = false;
-            let startX;
-            let scrollLeft;
+            let startX, startY, scrollLeft, scrollTop;
 
-            slider.addEventListener('mousedown', (e) => {
+            element.addEventListener('mousedown', (e) => {
+                // Se clicou em um card ou botão, não rola a tela
                 if (e.target.closest('.kanban-card') || e.target.closest('button')) return;
+
                 isDown = true;
-                startX = e.pageX - slider.offsetLeft;
-                scrollLeft = slider.scrollLeft;
+                element.style.cursor = 'grabbing';
+
+                // Captura as posições iniciais (X e Y)
+                startX = e.pageX - element.offsetLeft;
+                startY = e.pageY - element.offsetTop;
+                scrollLeft = element.scrollLeft;
+                scrollTop = element.scrollTop;
             });
 
-            slider.addEventListener('mouseleave', () => isDown = false);
-            slider.addEventListener('mouseup', () => isDown = false);
-            slider.addEventListener('mousemove', (e) => {
+            element.addEventListener('mouseleave', () => {
+                isDown = false;
+                element.style.cursor = '';
+            });
+
+            element.addEventListener('mouseup', () => {
+                isDown = false;
+                element.style.cursor = '';
+            });
+
+            element.addEventListener('mousemove', (e) => {
                 if (!isDown) return;
                 e.preventDefault();
-                const x = e.pageX - slider.offsetLeft;
-                const walk = (x - startX) * 2;
-                slider.scrollLeft = scrollLeft - walk;
+
+                // Calcula o movimento em ambas as direções
+                const x = e.pageX - element.offsetLeft;
+                const y = e.pageY - element.offsetTop;
+
+                const walkX = (x - startX) * 2; // Multiplicador de velocidade horizontal
+                const walkY = (y - startY) * 2; // Multiplicador de velocidade vertical
+
+                element.scrollLeft = scrollLeft - walkX;
+                element.scrollTop = scrollTop - walkY;
             });
         }
 
-        // 2. RENDERIZAÇÃO E CONFIGURAÇÃO DO SORTABLE
         function renderizarColunas() {
             const container = document.getElementById('kanban-container');
             container.innerHTML = '';
@@ -221,21 +248,25 @@
                 `;
                 container.appendChild(colDiv);
 
-                // Configuração do Sortable com Auto-Scroll Lateral Corrigido
-                new Sortable(document.getElementById(`col-${col.id}`), {
+                const colElement = document.getElementById(`col-${col.id}`);
+
+                // Ativa o Drag Scroll Vertical para o interior da coluna
+                makeDraggableScroll(colElement);
+
+                // Configuração do Sortable com a correção (forceFallback)
+                new Sortable(colElement, {
                     group: 'kanban',
                     animation: 200,
                     ghostClass: 'card-placeholder',
 
-                    // Ajustes para o card mover a tela
+                    // --- A MÁGICA ESTÁ AQUI ---
+                    forceFallback: true, // Ignora o Drag nativo do navegador para liberar o Scroll
+                    fallbackClass: "opacity-80", // Estilo do card enquanto arrasta
+
                     scroll: true,
-                    scrollSensitivity: 150, // Sensibilidade alta para detectar bordas
+                    scrollSensitivity: 150,
                     scrollSpeed: 30,
-                    bubbleScroll: true, // Crucial para o scroll subir para o container pai
-                    setData: function (dataTransfer, dragEl) {
-                        // Evita fantasmas estranhos no drag
-                        dataTransfer.setDragImage(dragEl, 0, 0);
-                    },
+                    bubbleScroll: true,
 
                     onEnd: async (evt) => {
                         const cardId = evt.item.dataset.id;
@@ -246,7 +277,6 @@
             });
         }
 
-        // 3. FUNÇÕES DO SUPABASE (CARREGAR, SALVAR, REMOVER)
         async function carregarCards() {
             const { data: cards, error } = await _supabase.from('cards').select('*').order('created_at', { ascending: false });
             if (error) return;
