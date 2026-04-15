@@ -4,8 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitação de Materiais - Igreja</title>
+    <title>Gestão de Criativos - Igreja</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <script>
@@ -13,266 +15,305 @@
             theme: {
                 extend: {
                     colors: {
-                        igreja: {
-                            blue: '#0047AB',
-                            black: '#111111',
-                            white: '#FFFFFF',
-                            gray: '#F3F4F6'
-                        }
+                        igreja: { blue: '#0047AB', black: '#111111', gray: '#F3F4F6' }
                     }
                 }
             }
         }
     </script>
-
     <style>
-        body {
-            background: linear-gradient(135deg, #e0e7ff 0%, #ffffff 100%);
+        .kanban-column {
+            min-height: 600px;
+            transition: background-color 0.2s;
+        }
+
+        .card-placeholder {
+            background: rgba(0, 71, 171, 0.05);
+            border: 2px dashed #0047AB;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        /* Custom scrollbar para as colunas */
+        .custom-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
         }
     </style>
 </head>
 
-<body class="min-h-screen p-4 md:p-8 flex justify-center items-center font-sans antialiased text-igreja-black">
+<body class="bg-slate-50 min-h-screen font-sans antialiased text-igreja-black">
 
-    <div
-        class="bg-white/80 backdrop-blur-sm p-6 md:p-10 rounded-3xl shadow-2xl w-full max-w-3xl border border-white/50">
-
-        <div class="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
-            <div>
-                <h1 class="text-3xl font-extrabold tracking-tight text-igreja-black">Solicitação de Criativos</h1>
-                <p id="descricaoForm" class="text-gray-600 mt-1.5 text-base font-normal">Preencha os dados abaixo para
-                    enviar as informações para mídia e gestão de culto.</p>
-            </div>
-            <div class="w-16 h-16 flex items-center justify-center">
-                <img src="logoigreja.png" alt="Logo da Igreja" class="h-14 w-auto object-contain">
-            </div>
-        </div>
-
-        <form id="mediaForm" class="space-y-6" onsubmit="prepararEnvio(event)">
-
-            <div class="relative">
-                <label class="block text-sm font-semibold text-gray-800 mb-1.5">Departamento responsável</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                        <i class="fa-solid fa-camera text-sm"></i>
-                    </div>
-                    <input type="text" id="departamento" required
-                        class="block w-full rounded-xl border-gray-200 bg-igreja-gray shadow-inner focus:ring-2 focus:ring-igreja-blue focus:bg-white border p-3 pl-11 text-base transition duration-150"
-                        placeholder="Ex: GS, Verbo Empreender, Futvida...">
+    <nav class="bg-white border-b p-4 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-[1600px] mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-igreja-blue rounded-xl flex items-center justify-center text-white">
+                    <i class="fa-solid fa-layer-group"></i>
                 </div>
+                <h1 class="text-xl font-black text-igreja-blue tracking-tight">MÍDIA HUB</h1>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 p-5 bg-gray-50 rounded-2xl border border-gray-100">
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 mb-1">Data de início</label>
-                    <input type="date" id="dataInicio" required
-                        class="block w-full rounded-lg border-gray-200 bg-white focus:ring-2 focus:ring-igreja-blue border p-2.5 text-base">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 mb-1">Data de término(Opcional)</label>
-                    <input type="date" id="dataFim"
-                        class="block w-full rounded-lg border-gray-200 bg-white focus:ring-2 focus:ring-igreja-blue border p-2.5 text-base">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 mb-1">Horário</label>
-                    <input type="time" id="horario" required
-                        class="block w-full rounded-lg border-gray-200 bg-white focus:ring-2 focus:ring-igreja-blue border p-2.5 text-base">
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-sm font-semibold text-gray-800 mb-1.5">Tema do evento</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                        <i class="fa-solid fa-keyboard text-sm"></i>
-                    </div>
-                    <input type="text" id="tema" required
-                        class="block w-full rounded-xl border-gray-200 bg-igreja-gray shadow-inner focus:ring-2 focus:ring-igreja-blue focus:bg-white border p-3 pl-11 text-base"
-                        placeholder="Título principal do evento">
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-sm font-semibold text-gray-800 mb-1.5">Nome(s) do(s) preletor(es)</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                        <i class="fa-solid fa-user-group text-sm"></i>
-                    </div>
-                    <input type="text" id="preletor" required
-                        class="block w-full rounded-xl border-gray-200 bg-igreja-gray shadow-inner focus:ring-2 focus:ring-igreja-blue focus:bg-white border p-3 pl-11 text-base">
-                </div>
-
-                <div
-                    class="mt-2.5 flex items-start gap-2 text-xs p-3 bg-orange-50 rounded-lg text-orange-800 border border-orange-200">
-                    <i class="fa-solid fa-triangle-exclamation mt-0.5 text-orange-500"></i>
-                    <p><b>Atenção:</b> Caso precise colocar alguma imagem ou foto, lembre-se de anexar direto no
-                        WhatsApp após clicar em enviar.</p>
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-sm font-semibold text-gray-800 mb-1.5">Local do evento</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                        <i class="fa-solid fa-location-dot text-sm"></i>
-                    </div>
-                    <input type="text" id="local" required placeholder="Ex: Nave, GD, Projeto..."
-                        class="block w-full rounded-xl border-gray-200 bg-igreja-gray shadow-inner focus:ring-2 focus:ring-igreja-blue focus:bg-white border p-3 pl-11 text-base">
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-lg font-semibold text-igreja-black mb-3">Artes solicitadas</label>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <label
-                        class="flex items-center gap-3 p-4 bg-igreja-gray rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
-                        <input type="checkbox" name="arte" value="Banner Telão da Igreja"
-                            class="w-5 h-5 rounded-md border-gray-300 text-igreja-blue">
-                        <span class="text-sm text-gray-800 font-medium">Banner Telão da Igreja</span>
-                    </label>
-                    <label
-                        class="flex items-center gap-3 p-4 bg-igreja-gray rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
-                        <input type="checkbox" name="arte" value="Banner Instagram"
-                            class="w-5 h-5 rounded-md border-gray-300 text-igreja-blue">
-                        <span class="text-sm text-gray-800 font-medium">Banner Instagram</span>
-                    </label>
-                    <label
-                        class="flex items-center gap-3 p-4 bg-igreja-gray rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
-                        <input type="checkbox" name="arte" value="Banner WhatsApp"
-                            class="w-5 h-5 rounded-md border-gray-300 text-igreja-blue">
-                        <span class="text-sm text-gray-800 font-medium">Banner WhatsApp</span>
-                    </label>
-                    <label
-                        class="flex items-center gap-3 p-4 bg-igreja-gray rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
-                        <input type="checkbox" name="arte" value="Vídeo de chamada p/ Telão (combinar com o pastor)"
-                            class="w-5 h-5 rounded-md border-gray-300 text-igreja-blue">
-                        <span class="text-sm text-gray-800 font-medium">Vídeo de chamada p/ Telão</span>
-                    </label>
-                    <label
-                        class="flex items-center gap-3 p-4 bg-igreja-gray rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
-                        <input type="checkbox" name="arte" value="Stories Instagram (a combinar)"
-                            class="w-5 h-5 rounded-md border-gray-300 text-igreja-blue">
-                        <span class="text-sm text-gray-800 font-medium">Stories Instagram</span>
-                    </label>
-                    <label
-                        class="flex items-center gap-3 p-4 bg-igreja-gray rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
-                        <input type="checkbox" name="arte" value="Reels Instagram (a combinar)"
-                            class="w-5 h-5 rounded-md border-gray-300 text-igreja-blue">
-                        <span class="text-sm text-gray-800 font-medium">Reels Instagram</span>
-                    </label>
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-sm font-semibold text-gray-800 mb-1.5">Descrição e observações
-                    adicionais</label>
-                <textarea id="observacoes" rows="3"
-                    class="block w-full rounded-xl border-gray-200 bg-igreja-gray shadow-inner focus:ring-2 focus:ring-igreja-blue focus:bg-white border p-3 text-base"
-                    placeholder="Informações extras..."></textarea>
-            </div>
-
-            <button type="submit"
-                class="w-full bg-igreja-blue text-white font-bold py-4 px-6 rounded-full hover:bg-blue-800 transform hover:scale-[1.01] transition duration-200 flex justify-center items-center text-lg shadow-lg shadow-blue-500/30">
-                <i class="fa-solid fa-paper-plane mr-2.5"></i> Gerar Solicitação
+            <button onclick="abrirModal()"
+                class="bg-igreja-blue text-white px-6 py-2.5 rounded-full font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-200 active:scale-95">
+                <i class="fa-solid fa-plus mr-2"></i>Nova Solicitação
             </button>
-        </form>
-
-        <div id="areaEnvio"
-            class="hidden mt-8 p-8 bg-green-50/50 backdrop-blur-sm border-2 border-green-200 rounded-3xl text-center shadow-xl">
-            <div
-                class="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-5 text-green-600 border border-green-200">
-                <i class="fa-solid fa-circle-check text-4xl"></i>
-            </div>
-            <h2 class="text-2xl font-extrabold text-green-900 mb-2">Solicitação Gerada!</h2>
-            <p class="text-base text-green-800 mb-6 max-w-md mx-auto">Escolha o destinatário abaixo para enviar no
-                WhatsApp.</p>
-
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <button onclick="enviarParaGrupoMidia()"
-                    class="w-full sm:w-auto bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-3.5 px-8 rounded-full hover:from-green-600 hover:to-green-700 transition duration-200 flex justify-center items-center text-base shadow-md shadow-green-500/30">
-                    <i class="fa-solid fa-copy text-xl mr-2.5"></i> Copiar e colocar no Solicitação Mídia
-                </button>
-                <a id="btnGestao" target="_blank"
-                    class="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 text-white font-bold py-3.5 px-8 rounded-full hover:from-green-700 hover:to-green-800 transition duration-200 flex justify-center items-center text-base shadow-md shadow-green-600/30">
-                    <i class="fa-brands fa-whatsapp text-2xl mr-2.5"></i> Enviar p/ Gestão de Culto
-                </a>
-            </div>
-
-            <button onclick="resetarFormulario()"
-                class="mt-6 text-sm text-gray-500 underline hover:text-igreja-black font-medium">Fazer nova
-                solicitação</button>
         </div>
+    </nav>
 
+    <main class="p-6">
+        <div id="kanban-container" class="flex gap-6 overflow-x-auto pb-6 custom-scroll items-start"
+            style="min-height: calc(100vh - 120px);">
+        </div>
+    </main>
+
+    <div id="modalForm"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-[60] flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-8 relative">
+            <button onclick="fecharModal()"
+                class="absolute top-6 right-6 text-gray-400 hover:text-black text-2xl transition-colors">&times;</button>
+
+            <header class="mb-8">
+                <h2 class="text-2xl font-black">Criar Novo Cartão</h2>
+                <p class="text-gray-500 text-sm">Preencha os detalhes da solicitação de mídia.</p>
+            </header>
+
+            <form id="mediaForm" class="space-y-5" onsubmit="salvarNoSupabase(event)">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Departamento</label>
+                    <input type="text" id="departamento" required
+                        class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 focus:ring-2 focus:ring-igreja-blue focus:bg-white transition-all outline-none"
+                        placeholder="Ex: Jovens, Kids, Louvor">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Data do Evento</label>
+                        <input type="date" id="dataInicio" required
+                            class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 text-sm focus:ring-2 focus:ring-igreja-blue outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Horário</label>
+                        <input type="time" id="horario" required
+                            class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 text-sm focus:ring-2 focus:ring-igreja-blue outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Tema / Nome do
+                        Evento</label>
+                    <input type="text" id="tema" required
+                        class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 focus:ring-2 focus:ring-igreja-blue outline-none"
+                        placeholder="Ex: Noite da Esperança">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Preletor</label>
+                        <input type="text" id="preletor" required
+                            class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 text-sm focus:ring-2 focus:ring-igreja-blue outline-none"
+                            placeholder="Nome">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Local</label>
+                        <input type="text" id="local" required
+                            class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 text-sm focus:ring-2 focus:ring-igreja-blue outline-none"
+                            placeholder="Ex: Templo Principal">
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                    <p class="text-xs font-bold mb-3 text-gray-400 uppercase">Materiais Solicitados</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="text-sm flex items-center gap-2 cursor-pointer"><input type="checkbox" name="arte"
+                                value="Feed" class="w-4 h-4 rounded text-igreja-blue"> Feed IG</label>
+                        <label class="text-sm flex items-center gap-2 cursor-pointer"><input type="checkbox" name="arte"
+                                value="Stories" class="w-4 h-4 rounded text-igreja-blue"> Stories</label>
+                        <label class="text-sm flex items-center gap-2 cursor-pointer"><input type="checkbox" name="arte"
+                                value="Telão" class="w-4 h-4 rounded text-igreja-blue"> Banner Telão</label>
+                        <label class="text-sm flex items-center gap-2 cursor-pointer"><input type="checkbox" name="arte"
+                                value="Vídeo" class="w-4 h-4 rounded text-igreja-blue"> Vídeo Chamada</label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Descrição /
+                        Observações</label>
+                    <textarea id="observacoes" rows="2"
+                        class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 focus:ring-2 focus:ring-igreja-blue outline-none"
+                        placeholder="Detalhes importantes..."></textarea>
+                </div>
+
+                <button type="submit" id="btnSalvar"
+                    class="w-full bg-igreja-blue text-white font-bold py-4 rounded-2xl hover:bg-blue-800 transition-all shadow-lg shadow-blue-100">
+                    Criar Cartão
+                </button>
+            </form>
+        </div>
     </div>
 
     <script>
-        const linkGrupoMidia = "https://chat.whatsapp.com/7EE237jhu0GKXIKPEpASIi";
-        const numeroGestao = "558196523954";
-        let mensagemFinal = "";
+        // CONFIGURAÇÃO SUPABASE
+        const _supabase = supabase.createClient('https://fuilsqakfhzgadshopan.supabase.co', 'sb_publishable_bhUX3iCEPheSGRs0rcYcDg_u7YEJAfC');
 
-        function prepararEnvio(event) {
-            event.preventDefault();
+        const colunas = [
+            { id: 'solicitacoes', nome: '📥 Solicitações' },
+            { id: 'analise', nome: '🔎 Alinhamento' },
+            { id: 'producao', nome: '🎨 Produção' },
+            { id: 'revisao', nome: '👀 Revisão' },
+            { id: 'pronto', nome: '✅ Pronto' },
+            { id: 'programado', nome: '📢 Programado' },
+            { id: 'arquivado', nome: '🗂️ Arquivado' }
+        ];
 
-            const departamento = document.getElementById('departamento').value;
-            const dataInicioInput = document.getElementById('dataInicio').value.split('-');
-            const dataInicioFormatada = `${dataInicioInput[2]}/${dataInicioInput[1]}/${dataInicioInput[0]}`;
-            const dataFimVal = document.getElementById('dataFim').value;
+        // INICIALIZAÇÃO
+        document.addEventListener('DOMContentLoaded', () => {
+            renderizarColunas();
+            carregarCards();
+            ativarRealtime();
+        });
 
-            let textoData = dataInicioFormatada;
-            if (dataFimVal && dataFimVal !== document.getElementById('dataInicio').value) {
-                const dataFimInput = dataFimVal.split('-');
-                const dataFimFormatada = `${dataFimInput[2]}/${dataFimInput[1]}/${dataFimInput[0]}`;
-                textoData = `${dataInicioFormatada} ate ${dataFimFormatada}`;
+        function renderizarColunas() {
+            const container = document.getElementById('kanban-container');
+            container.innerHTML = '';
+
+            colunas.forEach(col => {
+                const colDiv = document.createElement('div');
+                colDiv.className = "flex-shrink-0 w-80 flex flex-col";
+                colDiv.innerHTML = `
+                    <div class="flex items-center justify-between mb-4 px-1">
+                        <h3 class="font-black text-gray-400 uppercase text-[11px] tracking-widest">${col.nome}</h3>
+                        <span id="badge-${col.id}" class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">0</span>
+                    </div>
+                    <div id="col-${col.id}" data-status="${col.id}" class="kanban-column custom-scroll overflow-y-auto max-h-[70vh]"></div>
+                `;
+                container.appendChild(colDiv);
+
+                new Sortable(document.getElementById(`col-${col.id}`), {
+                    group: 'kanban',
+                    animation: 200,
+                    ghostClass: 'card-placeholder',
+                    onEnd: async (evt) => {
+                        const cardId = evt.item.dataset.id;
+                        const novoStatus = evt.to.dataset.status;
+                        await atualizarStatusCard(cardId, novoStatus);
+                    }
+                });
+            });
+        }
+
+        async function carregarCards() {
+            const { data: cards, error } = await _supabase
+                .from('cards')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) return console.error("Erro ao carregar:", error);
+
+            // Limpar todas as colunas antes de popular
+            document.querySelectorAll('.kanban-column').forEach(el => el.innerHTML = '');
+
+            cards.forEach(card => {
+                const cardEl = criarElementoCard(card);
+                const coluna = document.getElementById(`col-${card.status}`);
+                if (coluna) coluna.appendChild(cardEl);
+            });
+            atualizarContadores();
+        }
+
+        function criarElementoCard(card) {
+            const div = document.createElement('div');
+            div.className = 'bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-4 cursor-grab active:cursor-grabbing hover:shadow-md hover:border-blue-200 transition-all group relative';
+            div.dataset.id = card.id;
+
+            const dataFmt = new Date(card.data_inicio + 'T00:00:00').toLocaleDateString('pt-BR');
+            const materiaisHtml = card.materiais.map(m => `<span class="bg-blue-50 text-blue-600 text-[9px] px-2 py-0.5 rounded-md font-bold uppercase tracking-tighter">${m}</span>`).join(' ');
+
+            div.innerHTML = `
+                <div class="flex justify-between items-start mb-3">
+                    <span class="text-[9px] font-black text-white bg-igreja-blue px-2 py-0.5 rounded-full uppercase">${card.departamento}</span>
+                    <button onclick="removerCard('${card.id}')" class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                </div>
+                <h4 class="font-bold text-sm text-gray-800 leading-tight mb-2">${card.tema}</h4>
+                <div class="flex items-center gap-3 text-[10px] text-gray-400 mb-4">
+                    <span><i class="fa-regular fa-calendar mr-1"></i> ${dataFmt}</span>
+                    <span><i class="fa-regular fa-clock mr-1"></i> ${card.horario.substring(0, 5)}</span>
+                </div>
+                <div class="flex flex-wrap gap-1.5">${materiaisHtml}</div>
+            `;
+            return div;
+        }
+
+        async function salvarNoSupabase(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSalvar');
+            btn.disabled = true;
+            btn.innerText = "Salvando...";
+
+            const materiais = Array.from(document.querySelectorAll('input[name="arte"]:checked')).map(cb => cb.value);
+
+            const novoCard = {
+                departamento: document.getElementById('departamento').value,
+                data_inicio: document.getElementById('dataInicio').value,
+                horario: document.getElementById('horario').value,
+                tema: document.getElementById('tema').value,
+                preletor: document.getElementById('preletor').value,
+                local: document.getElementById('local').value,
+                observacoes: document.getElementById('observacoes').value,
+                materiais: materiais,
+                status: 'solicitacoes'
+            };
+
+            const { error } = await _supabase.from('cards').insert([novoCard]);
+
+            if (error) {
+                alert("Erro ao salvar: " + error.message);
+            } else {
+                fecharModal();
+                document.getElementById('mediaForm').reset();
+                carregarCards();
             }
-
-            const horario = document.getElementById('horario').value;
-            const tema = document.getElementById('tema').value;
-            const preletor = document.getElementById('preletor').value;
-            const local = document.getElementById('local').value;
-            const observacoes = document.getElementById('observacoes').value || "Nao existe";
-
-            const checkboxes = document.querySelectorAll('input[name="arte"]:checked');
-            let artesSelecionadas = [];
-            checkboxes.forEach((cb) => {
-                artesSelecionadas.push(`- ${cb.value}`);
-            });
-            const artesTexto = artesSelecionadas.length > 0 ? artesSelecionadas.join('\n') : "Nenhuma arte selecionada";
-
-            mensagemFinal = `SOLICITACAO DE CRIATIVOS\n\n` +
-                `Departamento: ${departamento}\n` +
-                `Data: ${textoData} as ${horario}\n` +
-                `Tema: ${tema}\n` +
-                `Preletor: ${preletor}\n` +
-                `Local: ${local}\n\n` +
-                `Materiais solicitados:\n${artesTexto}\n\n` +
-                `Descrição e solicitação:\n${observacoes}`;
-
-            const textoCodificado = encodeURIComponent(mensagemFinal);
-
-            document.getElementById('btnGestao').href = `https://wa.me/${numeroGestao}?text=${textoCodificado}`;
-
-            document.getElementById('descricaoForm').classList.add('hidden');
-            document.getElementById('mediaForm').classList.add('hidden');
-            document.getElementById('areaEnvio').classList.remove('hidden');
-            window.scrollTo(0, 0);
+            btn.disabled = false;
+            btn.innerText = "Criar Cartão";
         }
 
-        function enviarParaGrupoMidia() {
-            navigator.clipboard.writeText(mensagemFinal).then(() => {
-                alert("Dados da Mídia copiados! Basta colar no grupo que será aberto.");
-                window.open(linkGrupoMidia, '_blank');
-            }).catch(err => {
-                console.error('Erro ao copiar: ', err);
-                window.open(linkGrupoMidia, '_blank');
+        async function atualizarStatusCard(id, novoStatus) {
+            const { error } = await _supabase.from('cards').update({ status: novoStatus }).eq('id', id);
+            if (error) console.error("Erro ao mover:", error);
+            atualizarContadores();
+        }
+
+        async function removerCard(id) {
+            if (confirm("Deseja apagar permanentemente?")) {
+                await _supabase.from('cards').delete().eq('id', id);
+                carregarCards();
+            }
+        }
+
+        function atualizarContadores() {
+            colunas.forEach(col => {
+                const count = document.getElementById(`col-${col.id}`).children.length;
+                document.getElementById(`badge-${col.id}`).textContent = count;
             });
         }
 
-        function resetarFormulario() {
-            document.getElementById('mediaForm').reset();
-            document.getElementById('descricaoForm').classList.remove('hidden');
-            document.getElementById('mediaForm').classList.remove('hidden');
-            document.getElementById('areaEnvio').classList.add('hidden');
+        function ativarRealtime() {
+            _supabase
+                .channel('schema-db-changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'cards' }, () => {
+                    carregarCards();
+                })
+                .subscribe();
         }
+
+        function abrirModal() { document.getElementById('modalForm').classList.remove('hidden'); }
+        function fecharModal() { document.getElementById('modalForm').classList.add('hidden'); }
     </script>
 </body>
 
