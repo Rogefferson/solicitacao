@@ -1,43 +1,53 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Central de Mídias</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Nunito:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
   <style>
     :root {
-      --bg:          #0b1622;
-      --surface:     #111f30;
-      --surface2:    #172840;
-      --card-bg:     #152238;
-      --card-hover:  #1a2d4a;
-      --border:      rgba(255,255,255,0.07);
-      --border2:     rgba(255,255,255,0.12);
-      --gold:        #f4a435;
-      --gold-light:  #fbc46a;
-      --text:        #dce8f5;
-      --text-muted:  #6e8aa8;
-      --text-dim:    #3d5570;
-      --green:       #34d399;
-      --blue:        #60a5fa;
-      --purple:      #a78bfa;
-      --pink:        #f472b6;
-      --red:         #f87171;
-      --orange:      #fb923c;
-      --teal:        #2dd4bf;
-      --shadow:      0 8px 32px rgba(0,0,0,0.5);
-      --radius:      12px;
-      --radius-sm:   8px;
-      --header-h:    58px;
+      --bg: #0b1622;
+      --surface: #111f30;
+      --surface2: #172840;
+      --card-bg: #152238;
+      --card-hover: #1a2d4a;
+      --border: rgba(255, 255, 255, 0.07);
+      --border2: rgba(255, 255, 255, 0.12);
+      --gold: #f4a435;
+      --gold-light: #fbc46a;
+      --text: #dce8f5;
+      --text-muted: #6e8aa8;
+      --text-dim: #3d5570;
+      --green: #34d399;
+      --blue: #60a5fa;
+      --purple: #a78bfa;
+      --pink: #f472b6;
+      --red: #f87171;
+      --orange: #fb923c;
+      --teal: #2dd4bf;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --header-h: 58px;
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-    html, body {
+    html,
+    body {
       height: 100%;
       overscroll-behavior: none;
     }
@@ -82,7 +92,7 @@
       align-items: center;
       justify-content: center;
       font-size: 16px;
-      box-shadow: 0 4px 14px rgba(244,164,53,.35);
+      box-shadow: 0 4px 14px rgba(244, 164, 53, .35);
     }
 
     .logo h1 {
@@ -94,7 +104,9 @@
       text-overflow: ellipsis;
     }
 
-    .logo h1 span { color: var(--gold); }
+    .logo h1 span {
+      color: var(--gold);
+    }
 
     .header-right {
       display: flex;
@@ -130,13 +142,20 @@
       align-items: center;
       gap: 6px;
       transition: all .2s;
-      box-shadow: 0 3px 14px rgba(244,164,53,.3);
+      box-shadow: 0 3px 14px rgba(244, 164, 53, .3);
       letter-spacing: .01em;
       white-space: nowrap;
       -webkit-tap-highlight-color: transparent;
     }
-    .btn-primary:hover  { transform: translateY(-1px); box-shadow: 0 5px 20px rgba(244,164,53,.45); }
-    .btn-primary:active { transform: translateY(0); }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 20px rgba(244, 164, 53, .45);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
 
     .btn-secondary {
       background: var(--surface2);
@@ -151,12 +170,16 @@
       transition: all .2s;
       -webkit-tap-highlight-color: transparent;
     }
-    .btn-secondary:hover { color: var(--text); border-color: var(--border2); }
+
+    .btn-secondary:hover {
+      color: var(--text);
+      border-color: var(--border2);
+    }
 
     .btn-danger {
-      background: rgba(248,113,113,.1);
+      background: rgba(248, 113, 113, .1);
       color: var(--red);
-      border: 1px solid rgba(248,113,113,.2);
+      border: 1px solid rgba(248, 113, 113, .2);
       padding: 9px 16px;
       border-radius: 9px;
       font-family: 'Nunito', sans-serif;
@@ -166,7 +189,10 @@
       transition: all .2s;
       -webkit-tap-highlight-color: transparent;
     }
-    .btn-danger:hover { background: rgba(248,113,113,.2); }
+
+    .btn-danger:hover {
+      background: rgba(248, 113, 113, .2);
+    }
 
     /* ─── FLOATING ACTION BUTTON (mobile) ─────── */
     .fab {
@@ -185,13 +211,16 @@
       font-weight: 300;
       line-height: 1;
       cursor: pointer;
-      box-shadow: 0 6px 24px rgba(244,164,53,.5);
+      box-shadow: 0 6px 24px rgba(244, 164, 53, .5);
       align-items: center;
       justify-content: center;
       transition: transform .2s, box-shadow .2s;
       -webkit-tap-highlight-color: transparent;
     }
-    .fab:active { transform: scale(.92); }
+
+    .fab:active {
+      transform: scale(.92);
+    }
 
     /* ─── BOARD ──────────────────────────────── */
     .board {
@@ -207,9 +236,18 @@
       scroll-padding: 16px;
     }
 
-    .board::-webkit-scrollbar { height: 4px; }
-    .board::-webkit-scrollbar-track { background: transparent; }
-    .board::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+    .board::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    .board::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .board::-webkit-scrollbar-thumb {
+      background: var(--surface2);
+      border-radius: 3px;
+    }
 
     /* ─── COLUMN ─────────────────────────────── */
     .column {
@@ -270,8 +308,14 @@
       -webkit-overflow-scrolling: touch;
     }
 
-    .cards-wrap::-webkit-scrollbar { width: 3px; }
-    .cards-wrap::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 2px; }
+    .cards-wrap::-webkit-scrollbar {
+      width: 3px;
+    }
+
+    .cards-wrap::-webkit-scrollbar-thumb {
+      background: var(--surface2);
+      border-radius: 2px;
+    }
 
     /* ─── CARD ───────────────────────────────── */
     .card {
@@ -295,8 +339,14 @@
       box-shadow: var(--shadow);
     }
 
-    .card.sortable-ghost  { opacity: .25; }
-    .card.sortable-chosen { box-shadow: 0 10px 36px rgba(0,0,0,.55); transform: scale(1.02) rotate(.5deg); }
+    .card.sortable-ghost {
+      opacity: .25;
+    }
+
+    .card.sortable-chosen {
+      box-shadow: 0 10px 36px rgba(0, 0, 0, .55);
+      transform: scale(1.02) rotate(.5deg);
+    }
 
     .card-tema {
       font-weight: 800;
@@ -350,7 +400,10 @@
       flex-shrink: 0;
       margin-left: 6px;
     }
-    .card:hover .card-actions { opacity: 1; }
+
+    .card:hover .card-actions {
+      opacity: 1;
+    }
 
     .card-btn {
       background: var(--surface2);
@@ -367,7 +420,11 @@
       transition: all .15s;
       -webkit-tap-highlight-color: transparent;
     }
-    .card-btn:hover { background: var(--red); color: #fff; }
+
+    .card-btn:hover {
+      background: var(--red);
+      color: #fff;
+    }
 
     .empty-col {
       border: 2px dashed var(--border);
@@ -384,7 +441,7 @@
     .overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.72);
+      background: rgba(0, 0, 0, .72);
       backdrop-filter: blur(5px);
       -webkit-backdrop-filter: blur(5px);
       z-index: 1000;
@@ -396,11 +453,15 @@
       pointer-events: none;
       transition: opacity .25s;
     }
-    .overlay.active { opacity: 1; pointer-events: all; }
+
+    .overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
 
     .modal {
       background: var(--surface);
-      border: 1px solid rgba(255,255,255,.1);
+      border: 1px solid rgba(255, 255, 255, .1);
       border-radius: 16px;
       width: 100%;
       max-width: 560px;
@@ -409,11 +470,21 @@
       -webkit-overflow-scrolling: touch;
       transform: translateY(24px) scale(.97);
       transition: transform .25s;
-      box-shadow: 0 28px 80px rgba(0,0,0,.7);
+      box-shadow: 0 28px 80px rgba(0, 0, 0, .7);
     }
-    .modal::-webkit-scrollbar { width: 4px; }
-    .modal::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 2px; }
-    .overlay.active .modal { transform: none; }
+
+    .modal::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .modal::-webkit-scrollbar-thumb {
+      background: var(--surface2);
+      border-radius: 2px;
+    }
+
+    .overlay.active .modal {
+      transform: none;
+    }
 
     .modal-head {
       padding: 16px 18px 14px;
@@ -436,7 +507,13 @@
       gap: 8px;
       min-width: 0;
     }
-    .modal-title span { color: var(--gold); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .modal-title span {
+      color: var(--gold);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
     .modal-x {
       background: var(--surface2);
@@ -454,7 +531,11 @@
       transition: all .15s;
       -webkit-tap-highlight-color: transparent;
     }
-    .modal-x:hover { background: var(--red); color: #fff; }
+
+    .modal-x:hover {
+      background: var(--red);
+      color: #fff;
+    }
 
     .modal-body {
       padding: 16px 18px;
@@ -473,9 +554,17 @@
     }
 
     /* ─── FORM ───────────────────────────────── */
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
 
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
 
     label {
       font-size: .74rem;
@@ -485,28 +574,50 @@
       text-transform: uppercase;
     }
 
-    label .req { color: var(--gold); margin-left: 2px; }
+    label .req {
+      color: var(--gold);
+      margin-left: 2px;
+    }
 
-    input[type=text], input[type=date], input[type=time], select, textarea {
+    input[type=text],
+    input[type=date],
+    input[type=time],
+    select,
+    textarea {
       background: var(--surface2);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       color: var(--text);
       font-family: 'Nunito', sans-serif;
-      font-size: 1rem; /* 16px evita zoom no iOS */
+      font-size: 1rem;
+      /* 16px evita zoom no iOS */
       padding: 11px 12px;
       width: 100%;
       transition: border-color .2s, box-shadow .2s;
       outline: none;
       -webkit-appearance: none;
     }
-    input:focus, select:focus, textarea:focus {
+
+    input:focus,
+    select:focus,
+    textarea:focus {
       border-color: var(--gold);
-      box-shadow: 0 0 0 3px rgba(244,164,53,.12);
+      box-shadow: 0 0 0 3px rgba(244, 164, 53, .12);
     }
-    input::placeholder, textarea::placeholder { color: var(--text-dim); }
-    select option { background: var(--surface2); }
-    textarea { resize: vertical; min-height: 80px; }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: var(--text-dim);
+    }
+
+    select option {
+      background: var(--surface2);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
 
     .section-label {
       font-size: .74rem;
@@ -521,7 +632,11 @@
       border-bottom: 1px solid var(--border);
     }
 
-    .checks { display: flex; flex-direction: column; gap: 7px; }
+    .checks {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
 
     .check-item {
       display: flex;
@@ -535,8 +650,15 @@
       transition: all .15s;
       -webkit-tap-highlight-color: transparent;
     }
-    .check-item:hover  { border-color: rgba(244,164,53,.35); background: rgba(244,164,53,.05); }
-    .check-item:active { background: rgba(244,164,53,.08); }
+
+    .check-item:hover {
+      border-color: rgba(244, 164, 53, .35);
+      background: rgba(244, 164, 53, .05);
+    }
+
+    .check-item:active {
+      background: rgba(244, 164, 53, .08);
+    }
 
     .check-item input[type=checkbox] {
       width: 18px;
@@ -564,8 +686,15 @@
       gap: 10px;
     }
 
-    .detail-field { display: flex; flex-direction: column; gap: 5px; }
-    .detail-field.full { grid-column: 1 / -1; }
+    .detail-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .detail-field.full {
+      grid-column: 1 / -1;
+    }
 
     .detail-label {
       font-size: .72rem;
@@ -585,7 +714,12 @@
       min-height: 38px;
     }
 
-    .detail-tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 0; }
+    .detail-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 6px 0;
+    }
 
     /* ─── TOAST ──────────────────────────────── */
     #toasts {
@@ -613,12 +747,25 @@
       animation: toastIn .3s ease;
       max-width: 280px;
     }
-    .toast.success { border-color: var(--green); }
-    .toast.error   { border-color: var(--red); }
+
+    .toast.success {
+      border-color: var(--green);
+    }
+
+    .toast.error {
+      border-color: var(--red);
+    }
 
     @keyframes toastIn {
-      from { transform: translateX(100px); opacity: 0; }
-      to   { transform: none; opacity: 1; }
+      from {
+        transform: translateX(100px);
+        opacity: 0;
+      }
+
+      to {
+        transform: none;
+        opacity: 1;
+      }
     }
 
     /* ─── LOADING ─────────────────────────────── */
@@ -631,6 +778,7 @@
       font-size: .8rem;
       gap: 8px;
     }
+
     .spinner {
       width: 18px;
       height: 18px;
@@ -639,13 +787,18 @@
       border-radius: 50%;
       animation: spin .7s linear infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
 
     /* ─── CONFIRM DIALOG ─────────────────────── */
     .confirm-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.6);
+      background: rgba(0, 0, 0, .6);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
       z-index: 2000;
@@ -657,7 +810,12 @@
       pointer-events: none;
       transition: opacity .2s;
     }
-    .confirm-overlay.active { opacity: 1; pointer-events: all; }
+
+    .confirm-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
     .confirm-box {
       background: var(--surface);
       border: 1px solid var(--border2);
@@ -668,267 +826,341 @@
       text-align: center;
       box-shadow: var(--shadow);
     }
-    .confirm-box p { font-size: .93rem; color: var(--text); margin-bottom: 20px; line-height: 1.55; }
-    .confirm-box strong { color: var(--red); }
-    .confirm-btns { display: flex; gap: 10px; justify-content: center; }
-    .confirm-btns button { flex: 1; justify-content: center; }
+
+    .confirm-box p {
+      font-size: .93rem;
+      color: var(--text);
+      margin-bottom: 20px;
+      line-height: 1.55;
+    }
+
+    .confirm-box strong {
+      color: var(--red);
+    }
+
+    .confirm-btns {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .confirm-btns button {
+      flex: 1;
+      justify-content: center;
+    }
 
     /* ═══════════════════════════════════════════
        MOBILE — ≤ 600px
     ═══════════════════════════════════════════ */
     @media (max-width: 600px) {
-      :root { --header-h: 54px; }
+      :root {
+        --header-h: 54px;
+      }
 
-      header { padding: 0 14px; }
+      header {
+        padding: 0 14px;
+      }
 
-      .logo h1 { font-size: .92rem; }
+      .logo h1 {
+        font-size: .92rem;
+      }
 
       /* Hide stats badge on very small screens */
-      .stats-badge { display: none; }
+      .stats-badge {
+        display: none;
+      }
 
       /* Hide the header button on mobile — use FAB instead */
-      .header-new-btn { display: none; }
+      .header-new-btn {
+        display: none;
+      }
 
       /* Show FAB */
-      .fab { display: flex; }
+      .fab {
+        display: flex;
+      }
 
       /* Toasts above FAB */
-      #toasts { bottom: 88px; right: 12px; }
+      #toasts {
+        bottom: 88px;
+        right: 12px;
+      }
 
       /* Columns slightly narrower so next one peeks */
-      .column { width: calc(100vw - 48px); }
+      .column {
+        width: calc(100vw - 48px);
+      }
 
       /* Modal: slide up from bottom, full width */
-      .overlay { align-items: flex-end; padding: 0; }
+      .overlay {
+        align-items: flex-end;
+        padding: 0;
+      }
+
       .modal {
         max-width: 100%;
         max-height: 95vh;
         border-radius: 20px 20px 0 0;
         transform: translateY(100%);
       }
-      .overlay.active .modal { transform: translateY(0); }
 
-      .modal-head { border-radius: 20px 20px 0 0; padding: 14px 16px 12px; }
-      .modal-body { padding: 14px 16px; }
-      .modal-foot { padding: 10px 16px 24px; }
+      .overlay.active .modal {
+        transform: translateY(0);
+      }
+
+      .modal-head {
+        border-radius: 20px 20px 0 0;
+        padding: 14px 16px 12px;
+      }
+
+      .modal-body {
+        padding: 14px 16px;
+      }
+
+      .modal-foot {
+        padding: 10px 16px 24px;
+      }
 
       /* Stack form row on mobile */
-      .form-row { grid-template-columns: 1fr; gap: 10px; }
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
 
       /* Detail grid single column */
-      .detail-grid { grid-template-columns: 1fr; }
-      .detail-field.full { grid-column: 1; }
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .detail-field.full {
+        grid-column: 1;
+      }
 
       /* Card actions always visible on touch */
-      .card-actions { opacity: 1; }
+      .card-actions {
+        opacity: 1;
+      }
 
       /* Confirm box full-width */
-      .confirm-btns { flex-direction: column; }
-      .confirm-btns button { flex: unset; width: 100%; }
+      .confirm-btns {
+        flex-direction: column;
+      }
+
+      .confirm-btns button {
+        flex: unset;
+        width: 100%;
+      }
     }
 
     /* ═══════════════════════════════════════════
        TABLET — 601–900px
     ═══════════════════════════════════════════ */
     @media (min-width: 601px) and (max-width: 900px) {
-      .column { width: 250px; }
-      .stats-badge { display: none; }
+      .column {
+        width: 250px;
+      }
+
+      .stats-badge {
+        display: none;
+      }
     }
   </style>
 </head>
+
 <body>
 
-<!-- ─── HEADER ─── -->
-<header>
-  <div class="logo">
-    <div class="logo-icon">✦</div>
-    <h1>Central de <span>Mídias</span></h1>
-  </div>
-  <div class="header-right">
-    <span class="stats-badge" id="total-badge">— cards</span>
-    <button class="btn-primary header-new-btn" onclick="openNewModal()">＋ Nova Solicitação</button>
-  </div>
-</header>
-
-<!-- ─── FLOATING ACTION BUTTON (mobile only) ─── -->
-<button class="fab" onclick="openNewModal()" aria-label="Nova Solicitação">＋</button>
-
-<!-- ─── BOARD ─── -->
-<div class="board" id="board"></div>
-
-<!-- ─── MODAL: NOVA SOLICITAÇÃO ─── -->
-<div class="overlay" id="newOverlay">
-  <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title">✦ <span>Nova Solicitação</span></div>
-      <button class="modal-x" onclick="closeNewModal()">✕</button>
+  <!-- ─── HEADER ─── -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">✦</div>
+      <h1>Central de <span>Mídias</span></h1>
     </div>
-    <div class="modal-body">
+    <div class="header-right">
+      <span class="stats-badge" id="total-badge">— cards</span>
+      <button class="btn-primary header-new-btn" onclick="openNewModal()">＋ Nova Solicitação</button>
+    </div>
+  </header>
 
-      <div class="section-label">⬡ Dados do Evento</div>
+  <!-- ─── FLOATING ACTION BUTTON (mobile only) ─── -->
+  <button class="fab" onclick="openNewModal()" aria-label="Nova Solicitação">＋</button>
 
-      <div class="form-group">
-        <label>Departamento Responsável <span class="req">*</span></label>
-        <input type="text" id="f-dept" placeholder="Ex: Jovens, Louvor, EBD…" />
+  <!-- ─── BOARD ─── -->
+  <div class="board" id="board"></div>
+
+  <!-- ─── MODAL: NOVA SOLICITAÇÃO ─── -->
+  <div class="overlay" id="newOverlay">
+    <div class="modal">
+      <div class="modal-head">
+        <div class="modal-title">✦ <span>Nova Solicitação</span></div>
+        <button class="modal-x" onclick="closeNewModal()">✕</button>
       </div>
+      <div class="modal-body">
 
-      <div class="form-row">
+        <div class="section-label">⬡ Dados do Evento</div>
+
         <div class="form-group">
-          <label>Data do Evento <span class="req">*</span></label>
-          <input type="date" id="f-data" />
+          <label>Departamento Responsável <span class="req">*</span></label>
+          <input type="text" id="f-dept" placeholder="Ex: Jovens, Louvor, EBD…" />
         </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Data do Evento <span class="req">*</span></label>
+            <input type="date" id="f-data" />
+          </div>
+          <div class="form-group">
+            <label>Horário</label>
+            <input type="time" id="f-hora" />
+          </div>
+        </div>
+
         <div class="form-group">
-          <label>Horário</label>
-          <input type="time" id="f-hora" />
+          <label>Tema do Evento <span class="req">*</span></label>
+          <input type="text" id="f-tema" placeholder="Ex: Culto de Oração, Conferência…" />
         </div>
-      </div>
 
-      <div class="form-group">
-        <label>Tema do Evento <span class="req">*</span></label>
-        <input type="text" id="f-tema" placeholder="Ex: Culto de Oração, Conferência…" />
-      </div>
+        <div class="form-group">
+          <label>Nome(s) do(s) Preletor(es)</label>
+          <input type="text" id="f-preletor" placeholder="Ex: Pr. João Silva" />
+        </div>
 
-      <div class="form-group">
-        <label>Nome(s) do(s) Preletor(es)</label>
-        <input type="text" id="f-preletor" placeholder="Ex: Pr. João Silva" />
-      </div>
+        <div class="form-group">
+          <label>Local do Evento</label>
+          <input type="text" id="f-local" placeholder="Ex: Templo Principal, Salão…" />
+        </div>
 
-      <div class="form-group">
-        <label>Local do Evento</label>
-        <input type="text" id="f-local" placeholder="Ex: Templo Principal, Salão…" />
-      </div>
+        <div class="section-label">⬡ Opções de Criativo</div>
+        <div class="checks" id="checks-area">
+          <div class="check-item">
+            <input type="checkbox" id="m1" value="Banner Telão da Igreja" />
+            <label for="m1">Banner Telão da Igreja</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="m2" value="Banner Instagram" />
+            <label for="m2">Banner Instagram</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="m3" value="Banner WhatsApp" />
+            <label for="m3">Banner WhatsApp</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="m4" value="Vídeo Telão" />
+            <label for="m4">Vídeo de chamada p/ Telão (combinar com o pastor)</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="m5" value="Stories Instagram" />
+            <label for="m5">Stories Instagram (a combinar)</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="m6" value="Reels Instagram" />
+            <label for="m6">Reels Instagram (a combinar)</label>
+          </div>
+        </div>
 
-      <div class="section-label">⬡ Opções de Criativo</div>
-      <div class="checks" id="checks-area">
-        <div class="check-item">
-          <input type="checkbox" id="m1" value="Banner Telão da Igreja" />
-          <label for="m1">Banner Telão da Igreja</label>
+        <div class="section-label">⬡ Observações</div>
+        <div class="form-group">
+          <label>Detalhes adicionais</label>
+          <textarea id="f-obs"
+            placeholder="Taxa do evento, materiais necessários, foto do ministro de fora etc. Se não houver, escreva: Não existe."></textarea>
         </div>
-        <div class="check-item">
-          <input type="checkbox" id="m2" value="Banner Instagram" />
-          <label for="m2">Banner Instagram</label>
-        </div>
-        <div class="check-item">
-          <input type="checkbox" id="m3" value="Banner WhatsApp" />
-          <label for="m3">Banner WhatsApp</label>
-        </div>
-        <div class="check-item">
-          <input type="checkbox" id="m4" value="Vídeo Telão" />
-          <label for="m4">Vídeo de chamada p/ Telão (combinar com o pastor)</label>
-        </div>
-        <div class="check-item">
-          <input type="checkbox" id="m5" value="Stories Instagram" />
-          <label for="m5">Stories Instagram (a combinar)</label>
-        </div>
-        <div class="check-item">
-          <input type="checkbox" id="m6" value="Reels Instagram" />
-          <label for="m6">Reels Instagram (a combinar)</label>
-        </div>
-      </div>
 
-      <div class="section-label">⬡ Observações</div>
-      <div class="form-group">
-        <label>Detalhes adicionais</label>
-        <textarea id="f-obs" placeholder="Taxa do evento, materiais necessários, foto do ministro de fora etc. Se não houver, escreva: Não existe."></textarea>
       </div>
-
-    </div>
-    <div class="modal-foot">
-      <button class="btn-secondary" onclick="closeNewModal()">Cancelar</button>
-      <button class="btn-primary" id="submit-btn" onclick="submitCard()">Criar Solicitação</button>
+      <div class="modal-foot">
+        <button class="btn-secondary" onclick="closeNewModal()">Cancelar</button>
+        <button class="btn-primary" id="submit-btn" onclick="submitCard()">Criar Solicitação</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ─── MODAL: DETALHES ─── -->
-<div class="overlay" id="detailOverlay">
-  <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title">✦ <span id="d-title">Detalhes</span></div>
-      <button class="modal-x" onclick="closeDetailModal()">✕</button>
-    </div>
-    <div class="modal-body" id="d-body"></div>
-    <div class="modal-foot">
-      <button class="btn-danger" onclick="confirmDelete()">🗑 Excluir</button>
-      <button class="btn-secondary" onclick="closeDetailModal()">Fechar</button>
-    </div>
-  </div>
-</div>
-
-<!-- ─── CONFIRM DIALOG ─── -->
-<div class="confirm-overlay" id="confirmOverlay">
-  <div class="confirm-box">
-    <p>Deseja realmente <strong>excluir</strong> este card?<br>Esta ação não pode ser desfeita.</p>
-    <div class="confirm-btns">
-      <button class="btn-secondary" onclick="closeConfirm()">Cancelar</button>
-      <button class="btn-danger" onclick="doDelete()">Excluir</button>
+  <!-- ─── MODAL: DETALHES ─── -->
+  <div class="overlay" id="detailOverlay">
+    <div class="modal">
+      <div class="modal-head">
+        <div class="modal-title">✦ <span id="d-title">Detalhes</span></div>
+        <button class="modal-x" onclick="closeDetailModal()">✕</button>
+      </div>
+      <div class="modal-body" id="d-body"></div>
+      <div class="modal-foot">
+        <button class="btn-danger" onclick="confirmDelete()">🗑 Excluir</button>
+        <button class="btn-secondary" onclick="closeDetailModal()">Fechar</button>
+      </div>
     </div>
   </div>
-</div>
 
-<div id="toasts"></div>
+  <!-- ─── CONFIRM DIALOG ─── -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+      <p>Deseja realmente <strong>excluir</strong> este card?<br>Esta ação não pode ser desfeita.</p>
+      <div class="confirm-btns">
+        <button class="btn-secondary" onclick="closeConfirm()">Cancelar</button>
+        <button class="btn-danger" onclick="doDelete()">Excluir</button>
+      </div>
+    </div>
+  </div>
 
-<script>
-/* ═══════════════════════════════════════════════
-   CONFIG
-═══════════════════════════════════════════════ */
-const SUPABASE_URL = 'https://fuilsqakfhzgadshopan.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_bhUX3iCEPheSGRs0rcYcDg_u7YEJAfC';
+  <div id="toasts"></div>
 
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+  <script>
+    /* ═══════════════════════════════════════════════
+       CONFIG
+    ═══════════════════════════════════════════════ */
+    const SUPABASE_URL = 'https://fuilsqakfhzgadshopan.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_bhUX3iCEPheSGRs0rcYcDg_u7YEJAfC';
 
-const COLUMNS = [
-  { id: 'solicitacoes',  label: 'Solicitações',      color: '#60a5fa' },
-  { id: 'demanda_espera',label: 'Demanda em Espera', color: '#a78bfa' },
-  { id: 'em_producao',   label: 'Em Produção',       color: '#fb923c' },
-  { id: 'revisao',       label: 'Revisão',           color: '#f472b6' },
-  { id: 'pronto',        label: 'Pronto',            color: '#34d399' },
-  { id: 'programado',    label: 'Programado',        color: '#f4a435' },
-  { id: 'arquivado',     label: 'Arquivado',         color: '#4a6080' },
-];
+    const { createClient } = supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const TAG_STYLE = {
-  'Banner Telão da Igreja': { bg:'#1a3460', fg:'#60a5fa' },
-  'Banner Instagram':        { bg:'#3a1a40', fg:'#e879f9' },
-  'Banner WhatsApp':         { bg:'#0f3020', fg:'#34d399' },
-  'Vídeo Telão':             { bg:'#3a2210', fg:'#fb923c' },
-  'Stories Instagram':       { bg:'#3a102a', fg:'#f472b6' },
-  'Reels Instagram':         { bg:'#2a0f20', fg:'#f87171' },
-};
+    const COLUMNS = [
+      { id: 'solicitacoes', label: 'Solicitações', color: '#60a5fa' },
+      { id: 'demanda_espera', label: 'Demanda em Espera', color: '#a78bfa' },
+      { id: 'em_producao', label: 'Em Produção', color: '#fb923c' },
+      { id: 'revisao', label: 'Revisão', color: '#f472b6' },
+      { id: 'pronto', label: 'Pronto', color: '#34d399' },
+      { id: 'programado', label: 'Programado', color: '#f4a435' },
+      { id: 'arquivado', label: 'Arquivado', color: '#4a6080' },
+    ];
 
-const TAG_SHORT = {
-  'Banner Telão da Igreja': 'Telão',
-  'Banner Instagram':       'IG',
-  'Banner WhatsApp':        'WA',
-  'Vídeo Telão':            'Vídeo',
-  'Stories Instagram':      'Stories',
-  'Reels Instagram':        'Reels',
-};
+    const TAG_STYLE = {
+      'Banner Telão da Igreja': { bg: '#1a3460', fg: '#60a5fa' },
+      'Banner Instagram': { bg: '#3a1a40', fg: '#e879f9' },
+      'Banner WhatsApp': { bg: '#0f3020', fg: '#34d399' },
+      'Vídeo Telão': { bg: '#3a2210', fg: '#fb923c' },
+      'Stories Instagram': { bg: '#3a102a', fg: '#f472b6' },
+      'Reels Instagram': { bg: '#2a0f20', fg: '#f87171' },
+    };
 
-let allCards  = [];
-let sortables = [];
-let currentId = null;
+    const TAG_SHORT = {
+      'Banner Telão da Igreja': 'Telão',
+      'Banner Instagram': 'IG',
+      'Banner WhatsApp': 'WA',
+      'Vídeo Telão': 'Vídeo',
+      'Stories Instagram': 'Stories',
+      'Reels Instagram': 'Reels',
+    };
 
-/* ═══════════════════════════════════════════════
-   INIT
-═══════════════════════════════════════════════ */
-async function init() {
-  buildBoard();
-  await loadCards();
-}
+    let allCards = [];
+    let sortables = [];
+    let currentId = null;
 
-/* ═══════════════════════════════════════════════
-   BUILD BOARD SKELETON
-═══════════════════════════════════════════════ */
-function buildBoard() {
-  const board = document.getElementById('board');
-  board.innerHTML = '';
-  COLUMNS.forEach(col => {
-    const el = document.createElement('div');
-    el.className = 'column';
-    el.dataset.status = col.id;
-    el.innerHTML = `
+    /* ═══════════════════════════════════════════════
+       INIT
+    ═══════════════════════════════════════════════ */
+    async function init() {
+      buildBoard();
+      await loadCards();
+    }
+
+    /* ═══════════════════════════════════════════════
+       BUILD BOARD SKELETON
+    ═══════════════════════════════════════════════ */
+    function buildBoard() {
+      const board = document.getElementById('board');
+      board.innerHTML = '';
+      COLUMNS.forEach(col => {
+        const el = document.createElement('div');
+        el.className = 'column';
+        el.dataset.status = col.id;
+        el.innerHTML = `
       <div class="col-header">
         <div class="col-title">
           <span class="col-dot" style="background:${col.color}"></span>${col.label}
@@ -938,73 +1170,73 @@ function buildBoard() {
       <div class="cards-wrap" id="col-${col.id}">
         <div class="loading"><div class="spinner"></div> Carregando…</div>
       </div>`;
-    board.appendChild(el);
-  });
-}
-
-/* ═══════════════════════════════════════════════
-   LOAD CARDS FROM SUPABASE
-═══════════════════════════════════════════════ */
-async function loadCards() {
-  const { data, error } = await db
-    .from('cards')
-    .select('*')
-    .order('posicao', { ascending: true })
-    .order('created_at', { ascending: true });
-
-  if (error) { toast('Erro ao carregar dados: ' + error.message, 'error'); return; }
-
-  allCards = data || [];
-  renderAll();
-  initSortable();
-  updateTotalBadge();
-}
-
-/* ═══════════════════════════════════════════════
-   RENDER ALL COLUMNS
-═══════════════════════════════════════════════ */
-function renderAll() {
-  const grouped = {};
-  COLUMNS.forEach(c => { grouped[c.id] = []; });
-  allCards.forEach(card => {
-    const s = card.status || 'solicitacoes';
-    if (grouped[s]) grouped[s].push(card);
-  });
-
-  COLUMNS.forEach(col => {
-    const wrap  = document.getElementById(`col-${col.id}`);
-    const count = document.getElementById(`cnt-${col.id}`);
-    const cards = grouped[col.id];
-    wrap.innerHTML  = '';
-    count.textContent = cards.length;
-
-    if (!cards.length) {
-      wrap.innerHTML = '<div class="empty-col">Sem cards aqui</div>';
-      return;
+        board.appendChild(el);
+      });
     }
-    cards.forEach(card => wrap.appendChild(makeCardEl(card, col.color)));
-  });
-}
 
-/* ═══════════════════════════════════════════════
-   MAKE CARD ELEMENT
-═══════════════════════════════════════════════ */
-function makeCardEl(card, accentColor) {
-  const el = document.createElement('div');
-  el.className = 'card';
-  el.dataset.id = card.id;
-  el.style.setProperty('--accent', accentColor || '#f4a435');
+    /* ═══════════════════════════════════════════════
+       LOAD CARDS FROM SUPABASE
+    ═══════════════════════════════════════════════ */
+    async function loadCards() {
+      const { data, error } = await db
+        .from('cards')
+        .select('*')
+        .order('posicao', { ascending: true })
+        .order('created_at', { ascending: true });
 
-  const materiais = Array.isArray(card.materiais) ? card.materiais : [];
-  const tagsHtml  = materiais.slice(0, 4).map(m => {
-    const s = TAG_STYLE[m] || { bg:'#1e2d40', fg:'#aaa' };
-    return `<span class="tag" style="background:${s.bg};color:${s.fg}">${TAG_SHORT[m] || m}</span>`;
-  }).join('');
+      if (error) { toast('Erro ao carregar dados: ' + error.message, 'error'); return; }
 
-  const dateStr = card.data_inicio ? fmtDate(card.data_inicio) : '—';
-  const hora    = card.horario ? ' · ' + card.horario.substring(0,5) : '';
+      allCards = data || [];
+      renderAll();
+      initSortable();
+      updateTotalBadge();
+    }
 
-  el.innerHTML = `
+    /* ═══════════════════════════════════════════════
+       RENDER ALL COLUMNS
+    ═══════════════════════════════════════════════ */
+    function renderAll() {
+      const grouped = {};
+      COLUMNS.forEach(c => { grouped[c.id] = []; });
+      allCards.forEach(card => {
+        const s = card.status || 'solicitacoes';
+        if (grouped[s]) grouped[s].push(card);
+      });
+
+      COLUMNS.forEach(col => {
+        const wrap = document.getElementById(`col-${col.id}`);
+        const count = document.getElementById(`cnt-${col.id}`);
+        const cards = grouped[col.id];
+        wrap.innerHTML = '';
+        count.textContent = cards.length;
+
+        if (!cards.length) {
+          wrap.innerHTML = '<div class="empty-col">Sem cards aqui</div>';
+          return;
+        }
+        cards.forEach(card => wrap.appendChild(makeCardEl(card, col.color)));
+      });
+    }
+
+    /* ═══════════════════════════════════════════════
+       MAKE CARD ELEMENT
+    ═══════════════════════════════════════════════ */
+    function makeCardEl(card, accentColor) {
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.dataset.id = card.id;
+      el.style.setProperty('--accent', accentColor || '#f4a435');
+
+      const materiais = Array.isArray(card.materiais) ? card.materiais : [];
+      const tagsHtml = materiais.slice(0, 4).map(m => {
+        const s = TAG_STYLE[m] || { bg: '#1e2d40', fg: '#aaa' };
+        return `<span class="tag" style="background:${s.bg};color:${s.fg}">${TAG_SHORT[m] || m}</span>`;
+      }).join('');
+
+      const dateStr = card.data_inicio ? fmtDate(card.data_inicio) : '—';
+      const hora = card.horario ? ' · ' + card.horario.substring(0, 5) : '';
+
+      el.innerHTML = `
     <div class="card-tema">${esc(card.tema || 'Sem tema')}</div>
     <div class="card-meta">🏛 ${esc(card.departamento || '—')}</div>
     <div class="card-meta">📅 ${dateStr}${hora}</div>
@@ -1016,178 +1248,190 @@ function makeCardEl(card, accentColor) {
       </div>
     </div>`;
 
-  el.addEventListener('click', e => {
-    if (e.target.closest('.card-btn')) return;
-    openDetail(card.id);
-  });
-  return el;
-}
+      el.addEventListener('click', e => {
+        if (e.target.closest('.card-btn')) return;
+        openDetail(card.id);
+      });
+      return el;
+    }
 
-/* ═══════════════════════════════════════════════
-   SORTABLE (drag & drop)
-═══════════════════════════════════════════════ */
-function initSortable() {
-  sortables.forEach(s => s.destroy());
-  sortables = [];
+    /* ═══════════════════════════════════════════════
+       SORTABLE (drag & drop)
+    ═══════════════════════════════════════════════ */
+    function initSortable() {
+      sortables.forEach(s => s.destroy());
+      sortables = [];
 
-  COLUMNS.forEach(col => {
-    const wrap = document.getElementById(`col-${col.id}`);
-    const inst = Sortable.create(wrap, {
-      group:       'cards',
-      animation:   200,
-      ghostClass:  'sortable-ghost',
-      chosenClass: 'sortable-chosen',
-      filter:      '.empty-col',
-      onEnd: async evt => {
-        const id        = evt.item.dataset.id;
-        const newStatus = evt.to.closest('.column').dataset.status;
-        const newPos    = evt.newIndex;
+      COLUMNS.forEach(col => {
+        const wrap = document.getElementById(`col-${col.id}`);
+        const inst = Sortable.create(wrap, {
+          group: 'cards',
+          animation: 200,
+          ghostClass: 'sortable-ghost',
+          chosenClass: 'sortable-chosen',
+          filter: '.empty-col',
 
-        // Update local state immediately
-        const card = allCards.find(c => c.id === id);
-        if (card) card.status = newStatus;
+          onEnd: async evt => {
+            const id = evt.item.dataset.id;
+            const newStatus = evt.to.closest('.column').dataset.status;
+            const newPos = evt.newIndex;
 
-        // Re-render counts & empty states without full rebuild
-        updateCounts();
+            // ✅ Remove "Sem cards aqui" da coluna de destino
+            const emptyDest = evt.to.querySelector('.empty-col');
+            if (emptyDest) emptyDest.remove();
 
-        // Persist to Supabase
-        const { error } = await db
-          .from('cards')
-          .update({ status: newStatus, posicao: newPos })
-          .eq('id', id);
+            // ✅ Se a coluna de origem ficou vazia, recria placeholder
+            const fromWrap = evt.from;
+            if (!fromWrap.querySelector('.card')) {
+              fromWrap.innerHTML = '<div class="empty-col">Sem cards aqui</div>';
+            }
 
-        if (error) toast('Erro ao mover card', 'error');
-        else       toast('Card movido com sucesso!', 'success');
+            // Update local state imediatamente
+            const card = allCards.find(c => c.id === id);
+            if (card) card.status = newStatus;
+
+            // Atualiza contadores
+            updateCounts();
+
+            // Persistência
+            const { error } = await db
+              .from('cards')
+              .update({ status: newStatus, posicao: newPos })
+              .eq('id', id);
+
+            if (error) toast('Erro ao mover card', 'error');
+            else toast('Card movido com sucesso!', 'success');
+          }
+        });
+
+        sortables.push(inst);
+      });
+    }
+
+    function updateCounts() {
+      const cnt = {};
+      COLUMNS.forEach(c => { cnt[c.id] = 0; });
+      allCards.forEach(c => {
+        const s = c.status || 'solicitacoes';
+        if (cnt[s] !== undefined) cnt[s]++;
+      });
+      COLUMNS.forEach(c => {
+        const el = document.getElementById(`cnt-${c.id}`);
+        if (el) el.textContent = cnt[c.id];
+      });
+      updateTotalBadge();
+    }
+
+    function updateTotalBadge() {
+      const active = allCards.filter(c => c.status !== 'arquivado').length;
+      document.getElementById('total-badge').textContent =
+        `${allCards.length} card${allCards.length !== 1 ? 's' : ''} · ${active} ativos`;
+    }
+
+    /* ═══════════════════════════════════════════════
+       NEW CARD MODAL
+    ═══════════════════════════════════════════════ */
+    function openNewModal() {
+      document.getElementById('newOverlay').classList.add('active');
+      document.getElementById('f-dept').focus();
+    }
+
+    function closeNewModal() {
+      document.getElementById('newOverlay').classList.remove('active');
+      clearForm();
+    }
+
+    function clearForm() {
+      ['f-dept', 'f-data', 'f-hora', 'f-tema', 'f-preletor', 'f-local', 'f-obs'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      ['m1', 'm2', 'm3', 'm4', 'm5', 'm6'].forEach(id => {
+        document.getElementById(id).checked = false;
+      });
+      document.getElementById('submit-btn').disabled = false;
+      document.getElementById('submit-btn').textContent = 'Criar Solicitação';
+    }
+
+    async function submitCard() {
+      const dept = document.getElementById('f-dept').value.trim();
+      const tema = document.getElementById('f-tema').value.trim();
+      const data = document.getElementById('f-data').value;
+
+      if (!dept || !tema || !data) {
+        toast('Preencha os campos obrigatórios (*)', 'error');
+        return;
       }
-    });
-    sortables.push(inst);
-  });
-}
 
-function updateCounts() {
-  const cnt = {};
-  COLUMNS.forEach(c => { cnt[c.id] = 0; });
-  allCards.forEach(c => {
-    const s = c.status || 'solicitacoes';
-    if (cnt[s] !== undefined) cnt[s]++;
-  });
-  COLUMNS.forEach(c => {
-    const el = document.getElementById(`cnt-${c.id}`);
-    if (el) el.textContent = cnt[c.id];
-  });
-  updateTotalBadge();
-}
+      const checks = document.querySelectorAll('#checks-area input[type=checkbox]:checked');
+      const materiais = Array.from(checks).map(c => c.value);
 
-function updateTotalBadge() {
-  const active = allCards.filter(c => c.status !== 'arquivado').length;
-  document.getElementById('total-badge').textContent =
-    `${allCards.length} card${allCards.length !== 1 ? 's' : ''} · ${active} ativos`;
-}
+      const posicao = allCards.filter(c => c.status === 'solicitacoes').length;
 
-/* ═══════════════════════════════════════════════
-   NEW CARD MODAL
-═══════════════════════════════════════════════ */
-function openNewModal() {
-  document.getElementById('newOverlay').classList.add('active');
-  document.getElementById('f-dept').focus();
-}
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Criando…';
 
-function closeNewModal() {
-  document.getElementById('newOverlay').classList.remove('active');
-  clearForm();
-}
+      const payload = {
+        departamento: dept,
+        tema,
+        data_inicio: data,
+        horario: document.getElementById('f-hora').value || null,
+        preletor: document.getElementById('f-preletor').value.trim() || null,
+        local: document.getElementById('f-local').value.trim() || null,
+        observacoes: document.getElementById('f-obs').value.trim() || null,
+        materiais: materiais.length ? materiais : null,
+        status: 'solicitacoes',
+        posicao,
+      };
 
-function clearForm() {
-  ['f-dept','f-data','f-hora','f-tema','f-preletor','f-local','f-obs'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-  ['m1','m2','m3','m4','m5','m6'].forEach(id => {
-    document.getElementById(id).checked = false;
-  });
-  document.getElementById('submit-btn').disabled = false;
-  document.getElementById('submit-btn').textContent = 'Criar Solicitação';
-}
+      const { data: newCard, error } = await db.from('cards').insert(payload).select().single();
 
-async function submitCard() {
-  const dept  = document.getElementById('f-dept').value.trim();
-  const tema  = document.getElementById('f-tema').value.trim();
-  const data  = document.getElementById('f-data').value;
+      if (error) {
+        toast('Erro ao criar: ' + error.message, 'error');
+        btn.disabled = false;
+        btn.textContent = 'Criar Solicitação';
+        return;
+      }
 
-  if (!dept || !tema || !data) {
-    toast('Preencha os campos obrigatórios (*)','error');
-    return;
-  }
+      allCards.push(newCard);
 
-  const checks   = document.querySelectorAll('#checks-area input[type=checkbox]:checked');
-  const materiais = Array.from(checks).map(c => c.value);
+      // Add card to DOM without full re-render
+      const wrap = document.getElementById('col-solicitacoes');
+      const col = COLUMNS.find(c => c.id === 'solicitacoes');
+      const empty = wrap.querySelector('.empty-col');
+      if (empty) wrap.innerHTML = '';
+      wrap.appendChild(makeCardEl(newCard, col.color));
 
-  const posicao = allCards.filter(c => c.status === 'solicitacoes').length;
+      updateCounts();
+      closeNewModal();
+      toast('Solicitação criada com sucesso! ✓', 'success');
+    }
 
-  const btn = document.getElementById('submit-btn');
-  btn.disabled = true;
-  btn.textContent = 'Criando…';
+    /* ═══════════════════════════════════════════════
+       DETAIL MODAL
+    ═══════════════════════════════════════════════ */
+    function openDetail(id) {
+      const card = allCards.find(c => c.id === id);
+      if (!card) return;
+      currentId = id;
 
-  const payload = {
-    departamento: dept,
-    tema,
-    data_inicio:  data,
-    horario:      document.getElementById('f-hora').value || null,
-    preletor:     document.getElementById('f-preletor').value.trim() || null,
-    local:        document.getElementById('f-local').value.trim() || null,
-    observacoes:  document.getElementById('f-obs').value.trim() || null,
-    materiais:    materiais.length ? materiais : null,
-    status:       'solicitacoes',
-    posicao,
-  };
+      document.getElementById('d-title').textContent = card.tema || 'Detalhes';
 
-  const { data: newCard, error } = await db.from('cards').insert(payload).select().single();
+      const materiais = Array.isArray(card.materiais) ? card.materiais : [];
+      const tagsHtml = materiais.map(m => {
+        const s = TAG_STYLE[m] || { bg: '#1e2d40', fg: '#aaa' };
+        return `<span class="tag" style="background:${s.bg};color:${s.fg};font-size:.74rem;padding:4px 9px">${m}</span>`;
+      }).join('');
 
-  if (error) {
-    toast('Erro ao criar: ' + error.message, 'error');
-    btn.disabled = false;
-    btn.textContent = 'Criar Solicitação';
-    return;
-  }
+      const statusOpts = COLUMNS.map(c =>
+        `<option value="${c.id}" ${card.status === c.id ? 'selected' : ''}>${c.label}</option>`
+      ).join('');
 
-  allCards.push(newCard);
-
-  // Add card to DOM without full re-render
-  const wrap = document.getElementById('col-solicitacoes');
-  const col  = COLUMNS.find(c => c.id === 'solicitacoes');
-  const empty = wrap.querySelector('.empty-col');
-  if (empty) wrap.innerHTML = '';
-  wrap.appendChild(makeCardEl(newCard, col.color));
-
-  updateCounts();
-  closeNewModal();
-  toast('Solicitação criada com sucesso! ✓', 'success');
-}
-
-/* ═══════════════════════════════════════════════
-   DETAIL MODAL
-═══════════════════════════════════════════════ */
-function openDetail(id) {
-  const card = allCards.find(c => c.id === id);
-  if (!card) return;
-  currentId = id;
-
-  document.getElementById('d-title').textContent = card.tema || 'Detalhes';
-
-  const materiais = Array.isArray(card.materiais) ? card.materiais : [];
-  const tagsHtml  = materiais.map(m => {
-    const s = TAG_STYLE[m] || { bg:'#1e2d40', fg:'#aaa' };
-    return `<span class="tag" style="background:${s.bg};color:${s.fg};font-size:.74rem;padding:4px 9px">${m}</span>`;
-  }).join('');
-
-  const statusOpts = COLUMNS.map(c =>
-    `<option value="${c.id}" ${card.status===c.id?'selected':''}>${c.label}</option>`
-  ).join('');
-
-  document.getElementById('d-body').innerHTML = `
+      document.getElementById('d-body').innerHTML = `
     <div class="detail-grid">
       <div class="detail-field">
         <div class="detail-label">Departamento</div>
-        <div class="detail-val">${esc(card.departamento||'—')}</div>
+        <div class="detail-val">${esc(card.departamento || '—')}</div>
       </div>
       <div class="detail-field">
         <div class="detail-label">Data do Evento</div>
@@ -1195,19 +1439,19 @@ function openDetail(id) {
       </div>
       <div class="detail-field full">
         <div class="detail-label">Tema</div>
-        <div class="detail-val">${esc(card.tema||'—')}</div>
+        <div class="detail-val">${esc(card.tema || '—')}</div>
       </div>
       <div class="detail-field">
         <div class="detail-label">Horário</div>
-        <div class="detail-val">${card.horario ? card.horario.substring(0,5) : '—'}</div>
+        <div class="detail-val">${card.horario ? card.horario.substring(0, 5) : '—'}</div>
       </div>
       <div class="detail-field">
         <div class="detail-label">Local</div>
-        <div class="detail-val">${esc(card.local||'—')}</div>
+        <div class="detail-val">${esc(card.local || '—')}</div>
       </div>
       <div class="detail-field full">
         <div class="detail-label">Preletor(es)</div>
-        <div class="detail-val">${esc(card.preletor||'—')}</div>
+        <div class="detail-val">${esc(card.preletor || '—')}</div>
       </div>
       ${materiais.length ? `
       <div class="detail-field full">
@@ -1216,7 +1460,7 @@ function openDetail(id) {
       </div>` : ''}
       <div class="detail-field full">
         <div class="detail-label">Observações</div>
-        <div class="detail-val" style="white-space:pre-wrap">${esc(card.observacoes||'—')}</div>
+        <div class="detail-val" style="white-space:pre-wrap">${esc(card.observacoes || '—')}</div>
       </div>
       <div class="detail-field full">
         <div class="detail-label">Mover para coluna</div>
@@ -1224,107 +1468,108 @@ function openDetail(id) {
       </div>
     </div>`;
 
-  document.getElementById('detailOverlay').classList.add('active');
-}
-
-async function moveCard(id, newStatus) {
-  const { error } = await db.from('cards').update({ status: newStatus }).eq('id', id);
-  if (error) { toast('Erro ao mover: ' + error.message, 'error'); return; }
-
-  const card = allCards.find(c => c.id === id);
-  if (card) card.status = newStatus;
-
-  renderAll();
-  initSortable();
-  updateTotalBadge();
-  toast('Status atualizado!', 'success');
-}
-
-function closeDetailModal() {
-  document.getElementById('detailOverlay').classList.remove('active');
-  currentId = null;
-}
-
-/* ═══════════════════════════════════════════════
-   DELETE
-═══════════════════════════════════════════════ */
-function askDelete(e, id) {
-  e.stopPropagation();
-  currentId = id;
-  openConfirm();
-}
-
-function confirmDelete() { openConfirm(); }
-
-function openConfirm()  { document.getElementById('confirmOverlay').classList.add('active'); }
-function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('active'); }
-
-async function doDelete() {
-  if (!currentId) return;
-  const { error } = await db.from('cards').delete().eq('id', currentId);
-  closeConfirm();
-  if (error) { toast('Erro ao excluir: ' + error.message, 'error'); return; }
-
-  allCards = allCards.filter(c => c.id !== currentId);
-  renderAll();
-  initSortable();
-  updateTotalBadge();
-  closeDetailModal();
-  toast('Card excluído.', 'success');
-  currentId = null;
-}
-
-/* ═══════════════════════════════════════════════
-   UTILITIES
-═══════════════════════════════════════════════ */
-function fmtDate(d) {
-  if (!d) return '—';
-  const [y,m,day] = d.split('-');
-  return `${day}/${m}/${y}`;
-}
-
-function esc(str) {
-  if (!str) return str;
-  return String(str)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
-}
-
-function toast(msg, type = 'success') {
-  const c = document.getElementById('toasts');
-  const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  t.innerHTML = `<span>${type==='success'?'✓':'✕'}</span> ${msg}`;
-  c.appendChild(t);
-  setTimeout(() => t.remove(), 3500);
-}
-
-/* ─── Close on overlay click ─── */
-['newOverlay','detailOverlay'].forEach(id => {
-  document.getElementById(id).addEventListener('click', e => {
-    if (e.target === e.currentTarget) {
-      if (id === 'newOverlay') closeNewModal();
-      else closeDetailModal();
+      document.getElementById('detailOverlay').classList.add('active');
     }
-  });
-});
-document.getElementById('confirmOverlay').addEventListener('click', e => {
-  if (e.target === e.currentTarget) closeConfirm();
-});
 
-/* ─── Keyboard shortcuts ─── */
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    closeConfirm();
-    closeDetailModal();
-    closeNewModal();
-  }
-});
+    async function moveCard(id, newStatus) {
+      const { error } = await db.from('cards').update({ status: newStatus }).eq('id', id);
+      if (error) { toast('Erro ao mover: ' + error.message, 'error'); return; }
 
-/* ─── BOOT ─── */
-init();
-</script>
+      const card = allCards.find(c => c.id === id);
+      if (card) card.status = newStatus;
+
+      renderAll();
+      initSortable();
+      updateTotalBadge();
+      toast('Status atualizado!', 'success');
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detailOverlay').classList.remove('active');
+      currentId = null;
+    }
+
+    /* ═══════════════════════════════════════════════
+       DELETE
+    ═══════════════════════════════════════════════ */
+    function askDelete(e, id) {
+      e.stopPropagation();
+      currentId = id;
+      openConfirm();
+    }
+
+    function confirmDelete() { openConfirm(); }
+
+    function openConfirm() { document.getElementById('confirmOverlay').classList.add('active'); }
+    function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('active'); }
+
+    async function doDelete() {
+      if (!currentId) return;
+      const { error } = await db.from('cards').delete().eq('id', currentId);
+      closeConfirm();
+      if (error) { toast('Erro ao excluir: ' + error.message, 'error'); return; }
+
+      allCards = allCards.filter(c => c.id !== currentId);
+      renderAll();
+      initSortable();
+      updateTotalBadge();
+      closeDetailModal();
+      toast('Card excluído.', 'success');
+      currentId = null;
+    }
+
+    /* ═══════════════════════════════════════════════
+       UTILITIES
+    ═══════════════════════════════════════════════ */
+    function fmtDate(d) {
+      if (!d) return '—';
+      const [y, m, day] = d.split('-');
+      return `${day}/${m}/${y}`;
+    }
+
+    function esc(str) {
+      if (!str) return str;
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function toast(msg, type = 'success') {
+      const c = document.getElementById('toasts');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.innerHTML = `<span>${type === 'success' ? '✓' : '✕'}</span> ${msg}`;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    /* ─── Close on overlay click ─── */
+    ['newOverlay', 'detailOverlay'].forEach(id => {
+      document.getElementById(id).addEventListener('click', e => {
+        if (e.target === e.currentTarget) {
+          if (id === 'newOverlay') closeNewModal();
+          else closeDetailModal();
+        }
+      });
+    });
+    document.getElementById('confirmOverlay').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeConfirm();
+    });
+
+    /* ─── Keyboard shortcuts ─── */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        closeConfirm();
+        closeDetailModal();
+        closeNewModal();
+      }
+    });
+
+    /* ─── BOOT ─── */
+    init();
+  </script>
 </body>
+
 </html>
