@@ -1258,6 +1258,7 @@
     /* ═══════════════════════════════════════════════
        SORTABLE (drag & drop)
     ═══════════════════════════════════════════════ */
+
     function initSortable() {
       sortables.forEach(s => s.destroy());
       sortables = [];
@@ -1274,7 +1275,6 @@
           onEnd: async evt => {
             const id = evt.item.dataset.id;
             const newStatus = evt.to.closest('.column').dataset.status;
-            const newPos = evt.newIndex;
 
             // ✅ Remove "Sem cards aqui" da coluna de destino
             const emptyDest = evt.to.querySelector('.empty-col');
@@ -1286,21 +1286,39 @@
               fromWrap.innerHTML = '<div class="empty-col">Sem cards aqui</div>';
             }
 
-            // Update local state imediatamente
-            const card = allCards.find(c => c.id === id);
-            if (card) card.status = newStatus;
+            // 🆕 Recalcula TODAS as posições da coluna de destino
+            const toWrap = evt.to;
+            const cardsInColumn = Array.from(toWrap.querySelectorAll('.card'));
+
+            for (let i = 0; i < cardsInColumn.length; i++) {
+              const cardId = cardsInColumn[i].dataset.id;
+
+              // Atualiza no banco
+              const { error } = await db
+                .from('cards')
+                .update({
+                  status: newStatus,
+                  posicao: i
+                })
+                .eq('id', cardId);
+
+              if (error) {
+                toast('Erro ao ordenar cards', 'error');
+                return;
+              }
+
+              // Atualiza local
+              const localCard = allCards.find(c => c.id === cardId);
+              if (localCard) {
+                localCard.status = newStatus;
+                localCard.posicao = i;
+              }
+            }
 
             // Atualiza contadores
             updateCounts();
 
-            // Persistência
-            const { error } = await db
-              .from('cards')
-              .update({ status: newStatus, posicao: newPos })
-              .eq('id', id);
-
-            if (error) toast('Erro ao mover card', 'error');
-            else toast('Card movido com sucesso!', 'success');
+            toast('Card movido com sucesso!', 'success');
           }
         });
 
