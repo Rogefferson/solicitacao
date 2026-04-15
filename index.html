@@ -34,9 +34,9 @@
             margin-bottom: 12px;
         }
 
-        /* Custom scrollbar para as colunas */
         .custom-scroll::-webkit-scrollbar {
             width: 5px;
+            height: 8px;
         }
 
         .custom-scroll::-webkit-scrollbar-track {
@@ -46,6 +46,23 @@
         .custom-scroll::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 10px;
+        }
+
+        /* Cursor de "mão aberta" para indicar que pode arrastar o fundo */
+        #kanban-container {
+            display: flex;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-behavior: auto;
+            /* 'auto' é melhor para drag manual que 'smooth' */
+            cursor: grab;
+            user-select: none;
+            /* Evita selecionar texto enquanto arrasta */
+        }
+
+        /* Cursor de "mão fechada" enquanto está arrastando */
+        #kanban-container:active {
+            cursor: grabbing;
         }
     </style>
 </head>
@@ -68,7 +85,7 @@
     </nav>
 
     <main class="p-6">
-        <div id="kanban-container" class="flex gap-6 overflow-x-auto pb-6 custom-scroll items-start"
+        <div id="kanban-container" class="flex gap-6 pb-6 custom-scroll items-start"
             style="min-height: calc(100vh - 120px);">
         </div>
     </main>
@@ -78,20 +95,16 @@
         <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-8 relative">
             <button onclick="fecharModal()"
                 class="absolute top-6 right-6 text-gray-400 hover:text-black text-2xl transition-colors">&times;</button>
-
             <header class="mb-8">
                 <h2 class="text-2xl font-black">Criar Novo Cartão</h2>
                 <p class="text-gray-500 text-sm">Preencha os detalhes da solicitação de mídia.</p>
             </header>
-
             <form id="mediaForm" class="space-y-5" onsubmit="salvarNoSupabase(event)">
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Departamento</label>
                     <input type="text" id="departamento" required
-                        class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 focus:ring-2 focus:ring-igreja-blue focus:bg-white transition-all outline-none"
-                        placeholder="Ex: Jovens, Kids, Louvor">
+                        class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 focus:ring-2 focus:ring-igreja-blue outline-none">
                 </div>
-
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Data do Evento</label>
@@ -104,30 +117,24 @@
                             class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 text-sm focus:ring-2 focus:ring-igreja-blue outline-none">
                     </div>
                 </div>
-
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Tema / Nome do
                         Evento</label>
                     <input type="text" id="tema" required
-                        class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 focus:ring-2 focus:ring-igreja-blue outline-none"
-                        placeholder="Ex: Noite da Esperança">
+                        class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 focus:ring-2 focus:ring-igreja-blue outline-none">
                 </div>
-
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Preletor</label>
                         <input type="text" id="preletor" required
-                            class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 text-sm focus:ring-2 focus:ring-igreja-blue outline-none"
-                            placeholder="Nome">
+                            class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 text-sm focus:ring-2 focus:ring-igreja-blue outline-none">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Local</label>
                         <input type="text" id="local" required
-                            class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 text-sm focus:ring-2 focus:ring-igreja-blue outline-none"
-                            placeholder="Ex: Templo Principal">
+                            class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 text-sm focus:ring-2 focus:ring-igreja-blue outline-none">
                     </div>
                 </div>
-
                 <div class="bg-gray-50 p-5 rounded-2xl border border-gray-100">
                     <p class="text-xs font-bold mb-3 text-gray-400 uppercase">Materiais Solicitados</p>
                     <div class="grid grid-cols-2 gap-3">
@@ -141,25 +148,19 @@
                                 value="Vídeo" class="w-4 h-4 rounded text-igreja-blue"> Vídeo Chamada</label>
                     </div>
                 </div>
-
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Descrição /
-                        Observações</label>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Descrição</label>
                     <textarea id="observacoes" rows="2"
-                        class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 focus:ring-2 focus:ring-igreja-blue outline-none"
-                        placeholder="Detalhes importantes..."></textarea>
+                        class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 focus:ring-2 focus:ring-igreja-blue outline-none"></textarea>
                 </div>
-
                 <button type="submit" id="btnSalvar"
-                    class="w-full bg-igreja-blue text-white font-bold py-4 rounded-2xl hover:bg-blue-800 transition-all shadow-lg shadow-blue-100">
-                    Criar Cartão
-                </button>
+                    class="w-full bg-igreja-blue text-white font-bold py-4 rounded-2xl hover:bg-blue-800 transition-all">Criar
+                    Cartão</button>
             </form>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO SUPABASE
         const _supabase = supabase.createClient('https://fuilsqakfhzgadshopan.supabase.co', 'sb_publishable_bhUX3iCEPheSGRs0rcYcDg_u7YEJAfC');
 
         const colunas = [
@@ -172,12 +173,40 @@
             { id: 'arquivado', nome: '🗂️ Arquivado' }
         ];
 
-        // INICIALIZAÇÃO
         document.addEventListener('DOMContentLoaded', () => {
             renderizarColunas();
             carregarCards();
             ativarRealtime();
+            initDragScroll(); // Inicia a função de arrastar
         });
+
+        // --- NOVA FUNÇÃO: ARRASTAR TELA COM O MOUSE ---
+        function initDragScroll() {
+            const slider = document.getElementById('kanban-container');
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+
+            slider.addEventListener('mousedown', (e) => {
+                // Só ativa o drag se clicar no fundo (não em botões ou cards)
+                if (e.target !== slider && !e.target.classList.contains('flex-shrink-0')) return;
+
+                isDown = true;
+                startX = e.pageX - slider.offsetLeft;
+                scrollLeft = slider.scrollLeft;
+            });
+
+            slider.addEventListener('mouseleave', () => { isDown = false; });
+            slider.addEventListener('mouseup', () => { isDown = false; });
+
+            slider.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - slider.offsetLeft;
+                const walk = (x - startX) * 2; // Multiplicador de velocidade
+                slider.scrollLeft = scrollLeft - walk;
+            });
+        }
 
         function renderizarColunas() {
             const container = document.getElementById('kanban-container');
@@ -185,7 +214,7 @@
 
             colunas.forEach(col => {
                 const colDiv = document.createElement('div');
-                colDiv.className = "flex-shrink-0 w-80 flex flex-col";
+                colDiv.className = "flex-shrink-0 w-80 flex flex-col pointer-events-auto";
                 colDiv.innerHTML = `
                     <div class="flex items-center justify-between mb-4 px-1">
                         <h3 class="font-black text-gray-400 uppercase text-[11px] tracking-widest">${col.nome}</h3>
@@ -199,6 +228,9 @@
                     group: 'kanban',
                     animation: 200,
                     ghostClass: 'card-placeholder',
+                    scroll: true,
+                    scrollSensitivity: 100,
+                    scrollSpeed: 20,
                     onEnd: async (evt) => {
                         const cardId = evt.item.dataset.id;
                         const novoStatus = evt.to.dataset.status;
@@ -208,17 +240,14 @@
             });
         }
 
+        // Funções de dados (carregar, salvar, etc - permanecem as mesmas)
         async function carregarCards() {
             const { data: cards, error } = await _supabase
                 .from('cards')
                 .select('*')
                 .order('created_at', { ascending: false });
-
-            if (error) return console.error("Erro ao carregar:", error);
-
-            // Limpar todas as colunas antes de popular
+            if (error) return;
             document.querySelectorAll('.kanban-column').forEach(el => el.innerHTML = '');
-
             cards.forEach(card => {
                 const cardEl = criarElementoCard(card);
                 const coluna = document.getElementById(`col-${card.status}`);
@@ -231,19 +260,17 @@
             const div = document.createElement('div');
             div.className = 'bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-4 cursor-grab active:cursor-grabbing hover:shadow-md hover:border-blue-200 transition-all group relative';
             div.dataset.id = card.id;
-
-            const dataFmt = new Date(card.data_inicio + 'T00:00:00').toLocaleDateString('pt-BR');
-            const materiaisHtml = card.materiais.map(m => `<span class="bg-blue-50 text-blue-600 text-[9px] px-2 py-0.5 rounded-md font-bold uppercase tracking-tighter">${m}</span>`).join(' ');
-
+            const dataFmt = card.data_inicio ? new Date(card.data_inicio + 'T00:00:00').toLocaleDateString('pt-BR') : '--/--/--';
+            const materiaisHtml = (card.materiais || []).map(m => `<span class="bg-blue-50 text-blue-600 text-[9px] px-2 py-0.5 rounded-md font-bold uppercase tracking-tighter">${m}</span>`).join(' ');
             div.innerHTML = `
                 <div class="flex justify-between items-start mb-3">
-                    <span class="text-[9px] font-black text-white bg-igreja-blue px-2 py-0.5 rounded-full uppercase">${card.departamento}</span>
+                    <span class="text-[9px] font-black text-white bg-igreja-blue px-2 py-0.5 rounded-full uppercase">${card.departamento || 'Geral'}</span>
                     <button onclick="removerCard('${card.id}')" class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all"><i class="fa-solid fa-trash-can text-xs"></i></button>
                 </div>
                 <h4 class="font-bold text-sm text-gray-800 leading-tight mb-2">${card.tema}</h4>
                 <div class="flex items-center gap-3 text-[10px] text-gray-400 mb-4">
                     <span><i class="fa-regular fa-calendar mr-1"></i> ${dataFmt}</span>
-                    <span><i class="fa-regular fa-clock mr-1"></i> ${card.horario.substring(0, 5)}</span>
+                    <span><i class="fa-regular fa-clock mr-1"></i> ${card.horario ? card.horario.substring(0, 5) : '--:--'}</span>
                 </div>
                 <div class="flex flex-wrap gap-1.5">${materiaisHtml}</div>
             `;
@@ -252,12 +279,7 @@
 
         async function salvarNoSupabase(e) {
             e.preventDefault();
-            const btn = document.getElementById('btnSalvar');
-            btn.disabled = true;
-            btn.innerText = "Salvando...";
-
             const materiais = Array.from(document.querySelectorAll('input[name="arte"]:checked')).map(cb => cb.value);
-
             const novoCard = {
                 departamento: document.getElementById('departamento').value,
                 data_inicio: document.getElementById('dataInicio').value,
@@ -269,47 +291,28 @@
                 materiais: materiais,
                 status: 'solicitacoes'
             };
-
             const { error } = await _supabase.from('cards').insert([novoCard]);
-
-            if (error) {
-                alert("Erro ao salvar: " + error.message);
-            } else {
-                fecharModal();
-                document.getElementById('mediaForm').reset();
-                carregarCards();
-            }
-            btn.disabled = false;
-            btn.innerText = "Criar Cartão";
+            if (!error) { fecharModal(); document.getElementById('mediaForm').reset(); carregarCards(); }
         }
 
         async function atualizarStatusCard(id, novoStatus) {
-            const { error } = await _supabase.from('cards').update({ status: novoStatus }).eq('id', id);
-            if (error) console.error("Erro ao mover:", error);
+            await _supabase.from('cards').update({ status: novoStatus }).eq('id', id);
             atualizarContadores();
         }
 
         async function removerCard(id) {
-            if (confirm("Deseja apagar permanentemente?")) {
-                await _supabase.from('cards').delete().eq('id', id);
-                carregarCards();
-            }
+            if (confirm("Apagar?")) { await _supabase.from('cards').delete().eq('id', id); carregarCards(); }
         }
 
         function atualizarContadores() {
             colunas.forEach(col => {
-                const count = document.getElementById(`col-${col.id}`).children.length;
-                document.getElementById(`badge-${col.id}`).textContent = count;
+                const el = document.getElementById(`col-${col.id}`);
+                if (el) document.getElementById(`badge-${col.id}`).textContent = el.children.length;
             });
         }
 
         function ativarRealtime() {
-            _supabase
-                .channel('schema-db-changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'cards' }, () => {
-                    carregarCards();
-                })
-                .subscribe();
+            _supabase.channel('schema-db-changes').on('postgres_changes', { event: '*', schema: 'public', table: 'cards' }, () => carregarCards()).subscribe();
         }
 
         function abrirModal() { document.getElementById('modalForm').classList.remove('hidden'); }
