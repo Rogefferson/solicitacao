@@ -1111,31 +1111,31 @@
     const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const COLUMNS = [
-      { id: 'solicitacoes', label: 'Solicitações', color: '#60a5fa' },
+      { id: 'solicitacoes',   label: 'Solicitações',      color: '#60a5fa' },
       { id: 'demanda_espera', label: 'Demanda em Espera', color: '#a78bfa' },
-      { id: 'em_producao', label: 'Em Produção', color: '#fb923c' },
-      { id: 'revisao', label: 'Revisão', color: '#f472b6' },
-      { id: 'pronto', label: 'Pronto', color: '#34d399' },
-      { id: 'avisos', label: 'Avisos', color: '#f4a435' },
-      { id: 'arquivado', label: 'Arquivado', color: '#4a6080' },
+      { id: 'em_producao',    label: 'Em Produção',       color: '#fb923c' },
+      { id: 'revisao',        label: 'Revisão',           color: '#f472b6' },
+      { id: 'pronto',         label: 'Pronto',            color: '#34d399' },
+      { id: 'avisos',         label: 'Avisos',            color: '#f4a435' },
+      { id: 'arquivado',      label: 'Arquivado',         color: '#4a6080' },
     ];
 
     const TAG_STYLE = {
       'Banner Telão da Igreja': { bg: '#1a3460', fg: '#60a5fa' },
-      'Banner Instagram': { bg: '#3a1a40', fg: '#e879f9' },
-      'Banner WhatsApp': { bg: '#0f3020', fg: '#34d399' },
-      'Vídeo Telão': { bg: '#3a2210', fg: '#fb923c' },
-      'Stories Instagram': { bg: '#3a102a', fg: '#f472b6' },
-      'Reels Instagram': { bg: '#2a0f20', fg: '#f87171' },
+      'Banner Instagram':       { bg: '#3a1a40', fg: '#e879f9' },
+      'Banner WhatsApp':        { bg: '#0f3020', fg: '#34d399' },
+      'Vídeo Telão':            { bg: '#3a2210', fg: '#fb923c' },
+      'Stories Instagram':      { bg: '#3a102a', fg: '#f472b6' },
+      'Reels Instagram':        { bg: '#2a0f20', fg: '#f87171' },
     };
 
     const TAG_SHORT = {
       'Banner Telão da Igreja': 'Telão',
-      'Banner Instagram': 'IG',
-      'Banner WhatsApp': 'WA',
-      'Vídeo Telão': 'Vídeo',
-      'Stories Instagram': 'Stories',
-      'Reels Instagram': 'Reels',
+      'Banner Instagram':       'IG',
+      'Banner WhatsApp':        'WA',
+      'Vídeo Telão':            'Vídeo',
+      'Stories Instagram':      'Stories',
+      'Reels Instagram':        'Reels',
     };
 
     let allCards = [];
@@ -1148,6 +1148,7 @@
     async function init() {
       buildBoard();
       await loadCards();
+      await checkAutoAvisos(); // ← regra: ≤14 dias → coluna Avisos
     }
 
     /* ═══════════════════════════════════════════════
@@ -1190,6 +1191,39 @@
       renderAll();
       initSortable();
       updateTotalBadge();
+    }
+
+    /* ═══════════════════════════════════════════════
+       AUTO-AVISOS: move cards com ≤14 dias para Avisos
+    ═══════════════════════════════════════════════ */
+    async function checkAutoAvisos() {
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+
+      const paraAvisar = allCards.filter(card => {
+        if (!card.data_inicio) return false;
+        if (card.status === 'avisos' || card.status === 'arquivado') return false;
+
+        const evento = new Date(card.data_inicio + 'T00:00:00');
+        const diasRestantes = (evento - hoje) / (1000 * 60 * 60 * 24);
+        return diasRestantes <= 14;
+      });
+
+      if (!paraAvisar.length) return;
+
+      for (const card of paraAvisar) {
+        const { error } = await db
+          .from('cards')
+          .update({ status: 'avisos' })
+          .eq('id', card.id);
+
+        if (!error) card.status = 'avisos';
+      }
+
+      renderAll();
+      initSortable();
+      updateTotalBadge();
+      toast(`⚠️ ${paraAvisar.length} card(s) movido(s) para Avisos automaticamente.`, 'success');
     }
 
     /* ═══════════════════════════════════════════════
@@ -1258,7 +1292,6 @@
     /* ═══════════════════════════════════════════════
        SORTABLE (drag & drop)
     ═══════════════════════════════════════════════ */
-
     function initSortable() {
       sortables.forEach(s => s.destroy());
       sortables = [];
