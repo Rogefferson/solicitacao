@@ -22,11 +22,25 @@
         }
     </script>
     <style>
+        /* 1. ESCONDER SCROLLBARS */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        /* 2. ESTILO DAS COLUNAS */
         .kanban-column {
-            min-height: 600px;
+            min-height: 500px;
             transition: background-color 0.2s;
             cursor: grab;
-            /* Adicionado para a coluna ter a mãozinha também */
+            user-select: none;
+            /* Evita selecionar texto ao arrastar */
         }
 
         .kanban-column:active {
@@ -40,44 +54,26 @@
             margin-bottom: 12px;
         }
 
-        .custom-scroll::-webkit-scrollbar {
-            width: 5px;
-            height: 8px;
-        }
-
-        .custom-scroll::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
-        }
-
         /* Container Principal */
         #kanban-container {
             display: flex;
-            overflow: auto;
-            /* Modificado para permitir scroll vertical e horizontal */
+            overflow-x: auto;
             cursor: grab;
-            user-select: none;
-            -webkit-user-select: none;
             scroll-behavior: auto;
             gap: 1.5rem;
-            padding-bottom: 1.5rem;
+            padding-bottom: 2rem;
         }
 
         #kanban-container:active {
             cursor: grabbing;
         }
 
-        /* Garante que os cards não herdem o 'none' de seleção do pai */
         .kanban-card {
-            user-select: auto;
+            user-select: none;
             pointer-events: auto;
         }
 
-        /* Bloqueio de seleção apenas em áreas de drag da tela */
+        /* Área do título da coluna */
         .header-col {
             pointer-events: none;
         }
@@ -106,7 +102,7 @@
     </nav>
 
     <main class="p-6">
-        <div id="kanban-container" class="custom-scroll items-start" style="min-height: calc(100vh - 120px);">
+        <div id="kanban-container" class="hide-scrollbar items-start" style="min-height: calc(100vh - 120px);">
         </div>
     </main>
 
@@ -120,7 +116,7 @@
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Departamento</label>
                     <input type="text" id="departamento" required
-                        class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 focus:ring-2 focus:ring-igreja-blue outline-none">
+                        class="w-full rounded-xl border-gray-100 bg-gray-50 p-3 outline-none">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -137,28 +133,7 @@
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Tema</label>
                     <input type="text" id="tema" required class="w-full rounded-xl bg-gray-50 p-3 outline-none">
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="text" id="preletor" placeholder="Preletor"
-                        class="w-full rounded-xl bg-gray-50 p-3 outline-none">
-                    <input type="text" id="local" placeholder="Local"
-                        class="w-full rounded-xl bg-gray-50 p-3 outline-none">
-                </div>
-                <div class="bg-gray-50 p-5 rounded-2xl border border-gray-100">
-                    <p class="text-xs font-bold mb-3 text-gray-400 uppercase">Materiais</p>
-                    <div class="grid grid-cols-2 gap-3">
-                        <label class="text-sm flex items-center gap-2 cursor-pointer"><input type="checkbox" name="arte"
-                                value="Feed"> Feed IG</label>
-                        <label class="text-sm flex items-center gap-2 cursor-pointer"><input type="checkbox" name="arte"
-                                value="Stories"> Stories</label>
-                        <label class="text-sm flex items-center gap-2 cursor-pointer"><input type="checkbox" name="arte"
-                                value="Telão"> Banner Telão</label>
-                        <label class="text-sm flex items-center gap-2 cursor-pointer"><input type="checkbox" name="arte"
-                                value="Vídeo"> Vídeo Chamada</label>
-                    </div>
-                </div>
-                <textarea id="observacoes" rows="2" class="w-full rounded-xl bg-gray-50 p-3 outline-none"
-                    placeholder="Observações..."></textarea>
-                <button type="submit" id="btnSalvar"
+                <button type="submit"
                     class="w-full bg-igreja-blue text-white font-bold py-4 rounded-2xl hover:bg-blue-800 transition-all">Criar
                     Cartão</button>
             </form>
@@ -182,48 +157,49 @@
             renderizarColunas();
             carregarCards();
             ativarRealtime();
-
-            // Ativa o scroll horizontal/vertical global no container de fundo
-            makeDraggableScroll(document.getElementById('kanban-container'));
+            // Scroll horizontal do container principal
+            makeDraggableScroll(document.getElementById('kanban-container'), 'x');
         });
 
-        // --- NOVA FUNÇÃO DE DRAG SCROLL 2D (X e Y) ---
-        function makeDraggableScroll(element) {
+        // --- FUNÇÃO DE DRAG SCROLL MELHORADA ---
+        function makeDraggableScroll(element, axis = 'both') {
             let isDown = false;
             let startX, startY, scrollLeft, scrollTop;
 
             element.addEventListener('mousedown', (e) => {
-                // Se o clique for num card, aborta o drag da tela para o Sortable agir
+                // Impede o drag se clicar em card ou botão
                 if (e.target.closest('.kanban-card') || e.target.closest('button')) return;
 
                 isDown = true;
                 element.style.cursor = 'grabbing';
 
-                startX = e.clientX;
-                startY = e.clientY;
+                startX = e.pageX - element.offsetLeft;
+                startY = e.pageY - element.offsetTop;
                 scrollLeft = element.scrollLeft;
                 scrollTop = element.scrollTop;
+
+                // Impede o navegador de tentar "arrastar" o conteúdo como imagem/texto
+                e.preventDefault();
             });
 
-            element.addEventListener('mouseleave', () => {
-                isDown = false;
-                element.style.cursor = '';
-            });
-
-            element.addEventListener('mouseup', () => {
-                isDown = false;
-                element.style.cursor = '';
-            });
+            element.addEventListener('mouseleave', () => { isDown = false; element.style.cursor = 'grab'; });
+            element.addEventListener('mouseup', () => { isDown = false; element.style.cursor = 'grab'; });
 
             element.addEventListener('mousemove', (e) => {
                 if (!isDown) return;
                 e.preventDefault();
 
-                const walkX = (e.clientX - startX) * 1.5; // Velocidade Horizontal
-                const walkY = (e.clientY - startY) * 1.5; // Velocidade Vertical
+                if (axis === 'x' || axis === 'both') {
+                    const x = e.pageX - element.offsetLeft;
+                    const walkX = (x - startX) * 1.5;
+                    element.scrollLeft = scrollLeft - walkX;
+                }
 
-                element.scrollLeft = scrollLeft - walkX;
-                element.scrollTop = scrollTop - walkY;
+                if (axis === 'y' || axis === 'both') {
+                    const y = e.pageY - element.offsetTop;
+                    const walkY = (y - startY) * 1.5;
+                    element.scrollTop = scrollTop - walkY;
+                }
             });
         }
 
@@ -234,31 +210,25 @@
             colunas.forEach(col => {
                 const colDiv = document.createElement('div');
                 colDiv.className = "flex-shrink-0 w-80 flex flex-col";
-                // ADICIONADO: hide-scrollbar e pb-20
                 colDiv.innerHTML = `
                     <div class="flex items-center justify-between mb-4 px-1 header-col">
                         <h3 class="font-black text-gray-400 uppercase text-[11px] tracking-widest">${col.nome}</h3>
                         <span id="badge-${col.id}" class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">0</span>
                     </div>
-                    <div id="col-${col.id}" data-status="${col.id}" class="kanban-column hide-scrollbar overflow-y-auto max-h-[70vh] pb-20"></div>
+                    <div id="col-${col.id}" data-status="${col.id}" 
+                         class="kanban-column hide-scrollbar overflow-y-auto max-h-[75vh] pb-40"></div>
                 `;
                 container.appendChild(colDiv);
 
                 const colElement = document.getElementById(`col-${col.id}`);
 
-                makeDraggableScroll(colElement);
+                // Ativa a mãozinha vertical para a coluna específica
+                makeDraggableScroll(colElement, 'y');
 
                 new Sortable(colElement, {
                     group: 'kanban',
                     animation: 200,
                     ghostClass: 'card-placeholder',
-                    forceFallback: true,
-                    fallbackClass: "opacity-80",
-                    scroll: true,
-                    scrollSensitivity: 150,
-                    scrollSpeed: 30,
-                    bubbleScroll: true,
-
                     onEnd: async (evt) => {
                         const cardId = evt.item.dataset.id;
                         const novoStatus = evt.to.dataset.status;
@@ -268,6 +238,7 @@
             });
         }
 
+        // Funções de carregar, criar, deletar e realtime permanecem iguais...
         async function carregarCards() {
             const { data: cards, error } = await _supabase.from('cards').select('*').order('created_at', { ascending: false });
             if (error) return;
@@ -304,16 +275,11 @@
 
         async function salvarNoSupabase(e) {
             e.preventDefault();
-            const materiais = Array.from(document.querySelectorAll('input[name="arte"]:checked')).map(cb => cb.value);
             const { error } = await _supabase.from('cards').insert([{
                 departamento: document.getElementById('departamento').value,
                 data_inicio: document.getElementById('dataInicio').value,
                 horario: document.getElementById('horario').value,
                 tema: document.getElementById('tema').value,
-                preletor: document.getElementById('preletor').value,
-                local: document.getElementById('local').value,
-                observacoes: document.getElementById('observacoes').value,
-                materiais: materiais,
                 status: 'solicitacoes'
             }]);
             if (!error) { fecharModal(); document.getElementById('mediaForm').reset(); carregarCards(); }
@@ -325,7 +291,7 @@
         }
 
         async function removerCard(id) {
-            if (confirm("Apagar cartão permanentemente?")) {
+            if (confirm("Apagar cartão?")) {
                 await _supabase.from('cards').delete().eq('id', id);
                 carregarCards();
             }
