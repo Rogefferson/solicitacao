@@ -1111,31 +1111,31 @@
     const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const COLUMNS = [
-      { id: 'solicitacoes',   label: 'Solicitações',      color: '#60a5fa' },
+      { id: 'solicitacoes', label: 'Solicitações', color: '#60a5fa' },
       { id: 'demanda_espera', label: 'Demanda em Espera', color: '#a78bfa' },
-      { id: 'em_producao',    label: 'Em Produção',       color: '#fb923c' },
-      { id: 'revisao',        label: 'Revisão',           color: '#f472b6' },
-      { id: 'pronto',         label: 'Pronto',            color: '#34d399' },
-      { id: 'avisos',         label: 'Avisos',            color: '#f4a435' },
-      { id: 'arquivado',      label: 'Arquivado',         color: '#4a6080' },
+      { id: 'em_producao', label: 'Em Produção', color: '#fb923c' },
+      { id: 'revisao', label: 'Revisão', color: '#f472b6' },
+      { id: 'pronto', label: 'Pronto', color: '#34d399' },
+      { id: 'avisos', label: 'Avisos', color: '#f4a435' },
+      { id: 'arquivado', label: 'Arquivado', color: '#4a6080' },
     ];
 
     const TAG_STYLE = {
       'Banner Telão da Igreja': { bg: '#1a3460', fg: '#60a5fa' },
-      'Banner Instagram':       { bg: '#3a1a40', fg: '#e879f9' },
-      'Banner WhatsApp':        { bg: '#0f3020', fg: '#34d399' },
-      'Vídeo Telão':            { bg: '#3a2210', fg: '#fb923c' },
-      'Stories Instagram':      { bg: '#3a102a', fg: '#f472b6' },
-      'Reels Instagram':        { bg: '#2a0f20', fg: '#f87171' },
+      'Banner Instagram': { bg: '#3a1a40', fg: '#e879f9' },
+      'Banner WhatsApp': { bg: '#0f3020', fg: '#34d399' },
+      'Vídeo Telão': { bg: '#3a2210', fg: '#fb923c' },
+      'Stories Instagram': { bg: '#3a102a', fg: '#f472b6' },
+      'Reels Instagram': { bg: '#2a0f20', fg: '#f87171' },
     };
 
     const TAG_SHORT = {
       'Banner Telão da Igreja': 'Telão',
-      'Banner Instagram':       'IG',
-      'Banner WhatsApp':        'WA',
-      'Vídeo Telão':            'Vídeo',
-      'Stories Instagram':      'Stories',
-      'Reels Instagram':        'Reels',
+      'Banner Instagram': 'IG',
+      'Banner WhatsApp': 'WA',
+      'Vídeo Telão': 'Vídeo',
+      'Stories Instagram': 'Stories',
+      'Reels Instagram': 'Reels',
     };
 
     let allCards = [];
@@ -1413,10 +1413,23 @@
         return;
       }
 
+      // 1. Lógica de cálculo dos 14 dias
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      const evento = new Date(data + 'T00:00:00');
+      const diasRestantes = (evento - hoje) / (1000 * 60 * 60 * 24);
+
+      // 2. Define o status inicial baseado na proximidade do evento
+      let statusInicial = 'solicitacoes';
+      if (diasRestantes <= 14) {
+        statusInicial = 'avisos';
+      }
+
       const checks = document.querySelectorAll('#checks-area input[type=checkbox]:checked');
       const materiais = Array.from(checks).map(c => c.value);
 
-      const posicao = allCards.filter(c => c.status === 'solicitacoes').length;
+      // 3. Calcula a posição baseada na coluna de destino correta
+      const posicao = allCards.filter(c => c.status === statusInicial).length;
 
       const btn = document.getElementById('submit-btn');
       btn.disabled = true;
@@ -1431,7 +1444,7 @@
         local: document.getElementById('f-local').value.trim() || null,
         observacoes: document.getElementById('f-obs').value.trim() || null,
         materiais: materiais.length ? materiais : null,
-        status: 'solicitacoes',
+        status: statusInicial, // Usa o status dinâmico calculado
         posicao,
       };
 
@@ -1446,16 +1459,23 @@
 
       allCards.push(newCard);
 
-      // Add card to DOM without full re-render
-      const wrap = document.getElementById('col-solicitacoes');
-      const col = COLUMNS.find(c => c.id === 'solicitacoes');
+      // 4. Atualiza o DOM injetando o card na coluna certa dinamicamente
+      const wrap = document.getElementById(`col-${statusInicial}`);
+      const col = COLUMNS.find(c => c.id === statusInicial);
       const empty = wrap.querySelector('.empty-col');
-      if (empty) wrap.innerHTML = '';
+      if (empty) wrap.innerHTML = ''; // Remove o texto "Sem cards aqui" se houver
+
       wrap.appendChild(makeCardEl(newCard, col.color));
 
       updateCounts();
       closeNewModal();
-      toast('Solicitação criada com sucesso! ✓', 'success');
+
+      // Feedback personalizado se foi direto para avisos
+      if (statusInicial === 'avisos') {
+        toast('Solicitação urgente criada direto em Avisos! ⚠️', 'success');
+      } else {
+        toast('Solicitação criada com sucesso! ✓', 'success');
+      }
     }
 
     /* ═══════════════════════════════════════════════
