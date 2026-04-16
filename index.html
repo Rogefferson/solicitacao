@@ -680,15 +680,34 @@
     }
 
     /* ─── PHOTO UPLOAD ───────────────────────── */
+    .photos-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .photo-slot-label {
+      font-size: .68rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 5px;
+    }
+
     .photo-upload-area {
       border: 2px dashed var(--border2);
       border-radius: var(--radius);
-      padding: 18px 14px;
+      padding: 14px 10px;
       text-align: center;
       cursor: pointer;
       transition: border-color .2s, background .2s;
       position: relative;
       background: var(--surface2);
+      min-height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .photo-upload-area:hover {
@@ -717,17 +736,17 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       pointer-events: none;
     }
 
     .photo-upload-placeholder .upload-icon {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       line-height: 1;
     }
 
     .photo-upload-placeholder p {
-      font-size: .78rem;
+      font-size: .72rem;
       color: var(--text-muted);
       line-height: 1.4;
     }
@@ -741,7 +760,8 @@
       display: none;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 7px;
+      width: 100%;
     }
 
     .photo-preview-wrap.visible {
@@ -749,21 +769,23 @@
     }
 
     .photo-preview-wrap img {
-      width: 90px;
-      height: 90px;
+      width: 72px;
+      height: 72px;
       object-fit: cover;
       border-radius: 50%;
       border: 2px solid var(--gold);
       box-shadow: 0 0 0 4px rgba(244, 164, 53, .15);
+      pointer-events: none;
     }
 
     .photo-preview-name {
-      font-size: .72rem;
+      font-size: .67rem;
       color: var(--text-muted);
-      max-width: 200px;
+      max-width: 110px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      pointer-events: none;
     }
 
     .photo-remove-btn {
@@ -771,32 +793,53 @@
       border: 1px solid rgba(248, 113, 113, .25);
       color: var(--red);
       border-radius: 6px;
-      padding: 4px 10px;
-      font-size: .72rem;
+      padding: 3px 9px;
+      font-size: .68rem;
       font-weight: 700;
       cursor: pointer;
       font-family: 'Nunito', sans-serif;
       transition: background .15s;
       -webkit-tap-highlight-color: transparent;
+      position: relative;
+      z-index: 2;
     }
 
     .photo-remove-btn:hover { background: rgba(248,113,113,.22); }
 
-    .detail-photo-wrap {
+    @media (max-width: 600px) {
+      .photos-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+    }
+
+    .detail-photos-wrap {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
       padding: 14px 0 4px;
     }
 
-    .detail-photo-wrap img {
-      width: 88px;
-      height: 88px;
+    .detail-photo-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .detail-photo-item img {
+      width: 80px;
+      height: 80px;
       object-fit: cover;
       border-radius: 50%;
       border: 2px solid var(--gold);
       box-shadow: 0 0 0 4px rgba(244, 164, 53, .15);
+    }
+
+    .detail-photo-item span {
+      font-size: .67rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
     }
 
     .btn-download {
@@ -806,11 +849,11 @@
       background: rgba(96, 165, 250, .1);
       color: var(--blue);
       border: 1px solid rgba(96, 165, 250, .25);
-      padding: 8px 16px;
+      padding: 7px 14px;
       border-radius: 9px;
       font-family: 'Nunito', sans-serif;
       font-weight: 700;
-      font-size: .82rem;
+      font-size: .78rem;
       cursor: pointer;
       text-decoration: none;
       transition: background .15s;
@@ -1165,18 +1208,43 @@
         </div>
 
         <div class="form-group">
-          <label>Foto do Preletor</label>
-          <div class="photo-upload-area" id="photo-upload-area">
-            <input type="file" id="f-foto" accept="image/*" onchange="handlePhotoSelect(event)" />
-            <div class="photo-upload-placeholder" id="photo-placeholder">
-              <div class="upload-icon">🖼️</div>
-              <p><strong>Toque para adicionar uma foto</strong>JPG, PNG ou WEBP · máx. 5 MB</p>
+          <label>Fotos do Preletor <span style="color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0">(opcional · máx. 5 MB cada)</span></label>
+          <div class="photos-row">
+
+            <!-- SLOT 1 -->
+            <div>
+              <div class="photo-slot-label">Foto 1</div>
+              <div class="photo-upload-area" id="photo-area-1">
+                <input type="file" id="f-foto-1" accept="image/*" onchange="handlePhotoSelect(event,1)" />
+                <div class="photo-upload-placeholder" id="photo-placeholder-1">
+                  <div class="upload-icon">🖼️</div>
+                  <p><strong>Adicionar</strong>JPG, PNG, WEBP</p>
+                </div>
+                <div class="photo-preview-wrap" id="photo-preview-wrap-1">
+                  <img id="photo-preview-img-1" src="" alt="Preview 1" />
+                  <span class="photo-preview-name" id="photo-preview-name-1"></span>
+                  <button type="button" class="photo-remove-btn" onclick="removePhoto(event,1)">✕ Remover</button>
+                </div>
+              </div>
             </div>
-            <div class="photo-preview-wrap" id="photo-preview-wrap">
-              <img id="photo-preview-img" src="" alt="Preview" />
-              <span class="photo-preview-name" id="photo-preview-name"></span>
-              <button type="button" class="photo-remove-btn" onclick="removePhoto(event)">✕ Remover foto</button>
+
+            <!-- SLOT 2 -->
+            <div>
+              <div class="photo-slot-label">Foto 2</div>
+              <div class="photo-upload-area" id="photo-area-2">
+                <input type="file" id="f-foto-2" accept="image/*" onchange="handlePhotoSelect(event,2)" />
+                <div class="photo-upload-placeholder" id="photo-placeholder-2">
+                  <div class="upload-icon">🖼️</div>
+                  <p><strong>Adicionar</strong>JPG, PNG, WEBP</p>
+                </div>
+                <div class="photo-preview-wrap" id="photo-preview-wrap-2">
+                  <img id="photo-preview-img-2" src="" alt="Preview 2" />
+                  <span class="photo-preview-name" id="photo-preview-name-2"></span>
+                  <button type="button" class="photo-remove-btn" onclick="removePhoto(event,2)">✕ Remover</button>
+                </div>
+              </div>
             </div>
+
           </div>
         </div>
 
@@ -1297,38 +1365,49 @@
     let allCards = [];
     let sortables = [];
     let currentId = null;
-    let selectedPhotoFile = null;
+    let selectedPhotos = { 1: null, 2: null };
 
     /* ═══════════════════════════════════════════════
        PHOTO UPLOAD HELPERS
     ═══════════════════════════════════════════════ */
-    function handlePhotoSelect(e) {
+    function handlePhotoSelect(e, slot) {
       const file = e.target.files[0];
       if (!file) return;
       if (file.size > 5 * 1024 * 1024) {
-        toast('Imagem muito grande. Máximo: 5 MB.', 'error');
+        toast(`Foto ${slot} muito grande. Máximo: 5 MB.`, 'error');
         e.target.value = '';
         return;
       }
-      selectedPhotoFile = file;
+      selectedPhotos[slot] = file;
       const reader = new FileReader();
       reader.onload = ev => {
-        document.getElementById('photo-preview-img').src = ev.target.result;
-        document.getElementById('photo-preview-name').textContent = file.name;
-        document.getElementById('photo-placeholder').style.display = 'none';
-        document.getElementById('photo-preview-wrap').classList.add('visible');
+        document.getElementById(`photo-preview-img-${slot}`).src = ev.target.result;
+        document.getElementById(`photo-preview-name-${slot}`).textContent = file.name;
+        document.getElementById(`photo-placeholder-${slot}`).style.display = 'none';
+        document.getElementById(`photo-preview-wrap-${slot}`).classList.add('visible');
       };
       reader.readAsDataURL(file);
     }
 
-    function removePhoto(e) {
+    function removePhoto(e, slot) {
       e.stopPropagation();
-      selectedPhotoFile = null;
-      document.getElementById('f-foto').value = '';
-      document.getElementById('photo-preview-img').src = '';
-      document.getElementById('photo-preview-name').textContent = '';
-      document.getElementById('photo-placeholder').style.display = '';
-      document.getElementById('photo-preview-wrap').classList.remove('visible');
+      selectedPhotos[slot] = null;
+      document.getElementById(`f-foto-${slot}`).value = '';
+      document.getElementById(`photo-preview-img-${slot}`).src = '';
+      document.getElementById(`photo-preview-name-${slot}`).textContent = '';
+      document.getElementById(`photo-placeholder-${slot}`).style.display = '';
+      document.getElementById(`photo-preview-wrap-${slot}`).classList.remove('visible');
+    }
+
+    function resetAllPhotos() {
+      [1, 2].forEach(slot => {
+        selectedPhotos[slot] = null;
+        document.getElementById(`f-foto-${slot}`).value = '';
+        document.getElementById(`photo-preview-img-${slot}`).src = '';
+        document.getElementById(`photo-preview-name-${slot}`).textContent = '';
+        document.getElementById(`photo-placeholder-${slot}`).style.display = '';
+        document.getElementById(`photo-preview-wrap-${slot}`).classList.remove('visible');
+      });
     }
 
     async function uploadPhoto(file) {
@@ -1593,13 +1672,8 @@
       ['m1', 'm2', 'm3', 'm4', 'm5', 'm6'].forEach(id => {
         document.getElementById(id).checked = false;
       });
-      // Reset photo
-      selectedPhotoFile = null;
-      document.getElementById('f-foto').value = '';
-      document.getElementById('photo-preview-img').src = '';
-      document.getElementById('photo-preview-name').textContent = '';
-      document.getElementById('photo-placeholder').style.display = '';
-      document.getElementById('photo-preview-wrap').classList.remove('visible');
+      // Reset photos
+      resetAllPhotos();
 
       document.getElementById('submit-btn').disabled = false;
       document.getElementById('submit-btn').textContent = 'Criar Solicitação';
@@ -1642,12 +1716,16 @@
       btn.disabled = true;
       btn.textContent = 'Criando…';
 
-      // Upload da foto do preletor (se houver)
-      let fotoUrl = null;
-      if (selectedPhotoFile) {
-        btn.textContent = 'Enviando foto…';
+      // Upload das fotos do preletor (se houver)
+      let fotoUrl = null, fotoUrl2 = null;
+      const hasPhoto1 = !!selectedPhotos[1];
+      const hasPhoto2 = !!selectedPhotos[2];
+
+      if (hasPhoto1 || hasPhoto2) {
+        btn.textContent = 'Enviando fotos…';
         try {
-          fotoUrl = await uploadPhoto(selectedPhotoFile);
+          if (hasPhoto1) fotoUrl  = await uploadPhoto(selectedPhotos[1]);
+          if (hasPhoto2) fotoUrl2 = await uploadPhoto(selectedPhotos[2]);
         } catch (err) {
           toast('Erro ao enviar foto: ' + err.message, 'error');
           btn.disabled = false;
@@ -1666,6 +1744,7 @@
         observacoes: document.getElementById('f-obs').value.trim() || null,
         materiais: materiais.length ? materiais : null,
         foto_url: fotoUrl,
+        foto_url_2: fotoUrl2,
         status: statusInicial, // Usa o status dinâmico calculado
         posicao,
       };
@@ -1721,12 +1800,20 @@
       ).join('');
 
       document.getElementById('d-body').innerHTML = `
-    ${card.foto_url ? `
-    <div class="detail-photo-wrap">
-      <img src="${esc(card.foto_url)}" alt="Foto do preletor" />
-      <a class="btn-download" href="${esc(card.foto_url)}" download target="_blank">
-        ⬇ Baixar Foto do Preletor
-      </a>
+    ${(card.foto_url || card.foto_url_2) ? `
+    <div class="detail-photos-wrap">
+      ${card.foto_url ? `
+      <div class="detail-photo-item">
+        <img src="${esc(card.foto_url)}" alt="Foto 1" />
+        <span>Foto 1</span>
+        <a class="btn-download" href="${esc(card.foto_url)}" download target="_blank">⬇ Baixar</a>
+      </div>` : ''}
+      ${card.foto_url_2 ? `
+      <div class="detail-photo-item">
+        <img src="${esc(card.foto_url_2)}" alt="Foto 2" />
+        <span>Foto 2</span>
+        <a class="btn-download" href="${esc(card.foto_url_2)}" download target="_blank">⬇ Baixar</a>
+      </div>` : ''}
     </div>` : ''}
     <div class="detail-grid">
       <div class="detail-field">
