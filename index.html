@@ -308,8 +308,14 @@
       gap: 4px;
     }
 
-    .btn-pdf:hover { background: rgba(244, 164, 53, .22); }
-    .btn-pdf:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-pdf:hover {
+      background: rgba(244, 164, 53, .22);
+    }
+
+    .btn-pdf:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
 
     .col-count {
       background: var(--surface2);
@@ -827,10 +833,15 @@
       z-index: 2;
     }
 
-    .photo-remove-btn:hover { background: rgba(248,113,113,.22); }
+    .photo-remove-btn:hover {
+      background: rgba(248, 113, 113, .22);
+    }
 
     @media (max-width: 600px) {
-      .photos-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .photos-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
     }
 
     .detail-photos-wrap {
@@ -883,7 +894,9 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    .btn-download:hover { background: rgba(96, 165, 250, .2); }
+    .btn-download:hover {
+      background: rgba(96, 165, 250, .2);
+    }
 
     /* ─── DETAIL GRID ─── */
     .detail-grid {
@@ -1206,7 +1219,7 @@
 
         <div class="form-group">
           <label>Departamento Responsável <span class="req">*</span></label>
-          <input type="text" id="f-dept" placeholder="Ex: Jovens, Louvor, EBD…" />
+          <input type="text" id="f-dept" placeholder="Ex: GS, Futvida, Verbo Empreender..." />
         </div>
 
         <div class="form-row">
@@ -1222,16 +1235,18 @@
 
         <div class="form-group">
           <label>Tema do Evento <span class="req">*</span></label>
-          <input type="text" id="f-tema" placeholder="Ex: Culto de Oração, Conferência…" />
+          <input type="text" id="f-tema" placeholder="Ex: Culto de Casais, Conferência de Cura..." />
         </div>
 
         <div class="form-group">
           <label>Nome(s) do(s) Preletor(es)</label>
-          <input type="text" id="f-preletor" placeholder="Ex: Pr. João Silva" />
+          <input type="text" id="f-preletor" placeholder="Ex: Hugo Oliveira" />
         </div>
 
         <div class="form-group">
-          <label>Fotos do Preletor <span style="color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0">(opcional · máx. 5 MB cada)</span></label>
+          <label>Fotos do Preletor <span
+              style="color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0">(opcional · máx. 5 MB
+              cada)</span></label>
           <div class="photos-row">
 
             <!-- SLOT 1 -->
@@ -1273,7 +1288,7 @@
 
         <div class="form-group">
           <label>Local do Evento</label>
-          <input type="text" id="f-local" placeholder="Ex: Templo Principal, Salão…" />
+          <input type="text" id="f-local" placeholder="Ex: Nave, GD, Projeto" />
         </div>
 
         <div class="section-label">⬡ Opções de Criativo</div>
@@ -1757,7 +1772,7 @@
       if (hasPhoto1 || hasPhoto2) {
         btn.textContent = 'Enviando fotos…';
         try {
-          if (hasPhoto1) fotoUrl  = await uploadPhoto(selectedPhotos[1]);
+          if (hasPhoto1) fotoUrl = await uploadPhoto(selectedPhotos[1]);
           if (hasPhoto2) fotoUrl2 = await uploadPhoto(selectedPhotos[2]);
         } catch (err) {
           toast('Erro ao enviar foto: ' + err.message, 'error');
@@ -1983,11 +1998,11 @@
 
         const W = 210, margin = 18;
         const contentW = W - margin * 2;
-        const gold   = [244, 164, 53];
-        const dark   = [11,  22,  34];
-        const white  = [220, 232, 245];
-        const muted  = [110, 138, 168];
-        const border = [23,  40,  64];
+        const gold = [244, 164, 53];
+        const dark = [11, 22, 34];
+        const white = [220, 232, 245];
+        const muted = [110, 138, 168];
+        const border = [23, 40, 64];
 
         // ── FUNDO ESCURO TOTAL ──
         doc.setFillColor(...dark);
@@ -2018,7 +2033,7 @@
         // ── CARDS ──
         let y = 42;
         const cardH = 52;
-        const gap   = 5;
+        const gap = 5;
 
         cards.forEach((card, i) => {
           // Nova página se não couber
@@ -2059,10 +2074,10 @@
 
           // Campos
           const fields = [
-            { icon: '📅', label: 'Data',     value: fmtDate(card.data_inicio) },
-            { icon: '🕐', label: 'Horário',  value: card.horario ? card.horario.substring(0, 5) : '—' },
+            { icon: '📅', label: 'Data', value: fmtDate(card.data_inicio) },
+            { icon: '🕐', label: 'Horário', value: card.horario ? card.horario.substring(0, 5) : '—' },
             { icon: '🎙', label: 'Preletor', value: card.preletor || '—' },
-            { icon: '📍', label: 'Local',    value: card.local    || '—' },
+            { icon: '📍', label: 'Local', value: card.local || '—' },
           ];
 
           const colW = contentW / 2 - 4;
