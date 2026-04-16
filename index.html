@@ -10,6 +10,7 @@
     rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
   <style>
     :root {
@@ -287,6 +288,28 @@
       border-radius: 50%;
       flex-shrink: 0;
     }
+
+    .btn-pdf {
+      background: rgba(244, 164, 53, .12);
+      border: 1px solid rgba(244, 164, 53, .3);
+      color: var(--gold);
+      border-radius: 6px;
+      padding: 3px 9px;
+      font-size: .68rem;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      letter-spacing: .03em;
+      transition: background .15s;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-pdf:hover { background: rgba(244, 164, 53, .22); }
+    .btn-pdf:disabled { opacity: .45; cursor: not-allowed; }
 
     .col-count {
       background: var(--surface2);
@@ -1441,12 +1464,19 @@
         const el = document.createElement('div');
         el.className = 'column';
         el.dataset.status = col.id;
+        const pdfBtn = col.id === 'avisos'
+          ? `<button class="btn-pdf" id="pdf-btn" onclick="gerarPdfAvisos()" title="Gerar PDF dos Avisos">📄 PDF</button>`
+          : '';
+
         el.innerHTML = `
       <div class="col-header">
         <div class="col-title">
           <span class="col-dot" style="background:${col.color}"></span>${col.label}
         </div>
-        <span class="col-count" id="cnt-${col.id}">0</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          ${pdfBtn}
+          <span class="col-count" id="cnt-${col.id}">0</span>
+        </div>
       </div>
       <div class="cards-wrap" id="col-${col.id}">
         <div class="loading"><div class="spinner"></div> Carregando…</div>
@@ -1930,6 +1960,151 @@
         card.status = 'arquivado';
       }
       renderAll();
+    }
+
+    /* ═══════════════════════════════════════════════
+       GERAR PDF — AVISOS
+    ═══════════════════════════════════════════════ */
+    async function gerarPdfAvisos() {
+      const cards = allCards.filter(c => c.status === 'avisos');
+
+      if (!cards.length) {
+        toast('Nenhum card em Avisos para exportar.', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('pdf-btn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Gerando…';
+
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+        const W = 210, margin = 18;
+        const contentW = W - margin * 2;
+        const gold   = [244, 164, 53];
+        const dark   = [11,  22,  34];
+        const white  = [220, 232, 245];
+        const muted  = [110, 138, 168];
+        const border = [23,  40,  64];
+
+        // ── FUNDO ESCURO TOTAL ──
+        doc.setFillColor(...dark);
+        doc.rect(0, 0, 210, 297, 'F');
+
+        // ── CABEÇALHO ──
+        doc.setFillColor(...border);
+        doc.roundedRect(margin, 12, contentW, 22, 4, 4, 'F');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(14);
+        doc.setTextColor(...gold);
+        doc.text('✦ Central de Mídias', margin + 6, 21.5);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...muted);
+        doc.text('Avisos — Eventos nos próximos 14 dias', margin + 6, 28);
+
+        const today = new Date().toLocaleDateString('pt-BR');
+        doc.text(`Gerado em: ${today}`, W - margin - 2, 28, { align: 'right' });
+
+        // ── LINHA DOURADA ──
+        doc.setDrawColor(...gold);
+        doc.setLineWidth(0.4);
+        doc.line(margin, 37, W - margin, 37);
+
+        // ── CARDS ──
+        let y = 42;
+        const cardH = 52;
+        const gap   = 5;
+
+        cards.forEach((card, i) => {
+          // Nova página se não couber
+          if (y + cardH > 282) {
+            doc.addPage();
+            doc.setFillColor(...dark);
+            doc.rect(0, 0, 210, 297, 'F');
+            y = 14;
+          }
+
+          // Card bg
+          doc.setFillColor(...border);
+          doc.roundedRect(margin, y, contentW, cardH, 3, 3, 'F');
+
+          // Borda esquerda dourada
+          doc.setFillColor(...gold);
+          doc.roundedRect(margin, y, 3, cardH, 1.5, 1.5, 'F');
+
+          // Número do card
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(7);
+          doc.setTextColor(...muted);
+          doc.text(`#${String(i + 1).padStart(2, '0')}`, margin + 8, y + 6.5);
+
+          // Tema
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(11);
+          doc.setTextColor(...white);
+          const tema = card.tema || 'Sem tema';
+          const temaLines = doc.splitTextToSize(tema, contentW - 30);
+          doc.text(temaLines[0], margin + 8, y + 14);
+
+          // Linha divisória interna
+          doc.setDrawColor(...border);
+          doc.setDrawColor(40, 65, 96);
+          doc.setLineWidth(0.2);
+          doc.line(margin + 6, y + 18, W - margin - 4, y + 18);
+
+          // Campos
+          const fields = [
+            { icon: '📅', label: 'Data',     value: fmtDate(card.data_inicio) },
+            { icon: '🕐', label: 'Horário',  value: card.horario ? card.horario.substring(0, 5) : '—' },
+            { icon: '🎙', label: 'Preletor', value: card.preletor || '—' },
+            { icon: '📍', label: 'Local',    value: card.local    || '—' },
+          ];
+
+          const colW = contentW / 2 - 4;
+          fields.forEach((f, fi) => {
+            const col = fi % 2;
+            const row = Math.floor(fi / 2);
+            const fx = margin + 8 + col * (colW + 8);
+            const fy = y + 25 + row * 11;
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(6.5);
+            doc.setTextColor(...muted);
+            doc.text(f.label.toUpperCase(), fx, fy);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8.5);
+            doc.setTextColor(...white);
+            const val = doc.splitTextToSize(f.value, colW - 4);
+            doc.text(val[0], fx, fy + 5);
+          });
+
+          y += cardH + gap;
+        });
+
+        // ── RODAPÉ ──
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(...muted);
+        doc.text(
+          `Central de Mídias · ${cards.length} aviso${cards.length !== 1 ? 's' : ''}`,
+          W / 2, 291, { align: 'center' }
+        );
+
+        doc.save(`avisos-${today.replace(/\//g, '-')}.pdf`);
+        toast('PDF gerado com sucesso! ✓', 'success');
+
+      } catch (err) {
+        toast('Erro ao gerar PDF: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '📄 PDF';
+      }
     }
 
     /* ═══════════════════════════════════════════════
