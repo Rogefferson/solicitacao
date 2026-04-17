@@ -1829,8 +1829,8 @@
             const newStatus = evt.to.closest('.column').dataset.status;
             const oldStatus = evt.from.closest('.column').dataset.status;
 
-            // 🔒 Block drag from em_producao to revisao if checklist incomplete
-            if (oldStatus === 'em_producao' && newStatus === 'revisao') {
+            // 🔒 Block drag from em_producao to revisao or pronto if checklist incomplete
+            if (oldStatus === 'em_producao' && (newStatus === 'revisao' || newStatus === 'pronto')) {
               const card = allCards.find(c => c.id === id);
               if (card) {
                 const materiais = Array.isArray(card.materiais) ? card.materiais : [];
@@ -2065,11 +2065,10 @@
       const pct = total > 0 ? Math.round((done / total) * 100) : 100;
       const allDone = total === 0 || done === total;
 
-      // Build status options — block "revisao" if in em_producao and not all done
+      // Build status options — block "revisao" and "pronto" if in em_producao and not all done
       const statusOpts = COLUMNS.map(c => {
-        const isRevisao = c.id === 'revisao';
-        const blocked = isEmProducao && isRevisao && !allDone;
-        return `<option value="${c.id}" ${card.status === c.id ? 'selected' : ''} ${blocked ? 'disabled' : ''}>${c.label}${blocked ? ' 🔒' : ''}</option>`;
+        const isBlocked = isEmProducao && (c.id === 'revisao' || c.id === 'pronto') && !allDone;
+        return `<option value="${c.id}" ${card.status === c.id ? 'selected' : ''} ${isBlocked ? 'disabled' : ''}>${c.label}${isBlocked ? ' 🔒' : ''}</option>`;
       }).join('');
 
       // Checklist block (only in em_producao with materiais)
@@ -2237,14 +2236,17 @@
         }
       }
 
-      // Update the "Mover para coluna" select — unlock/lock Revisão
+      // Update the "Mover para coluna" select — unlock/lock Revisão e Pronto
       const sel = document.querySelector('#d-body select');
       if (sel) {
-        const revisaoOpt = sel.querySelector('option[value="revisao"]');
-        if (revisaoOpt) {
-          revisaoOpt.disabled = !allDone;
-          revisaoOpt.textContent = `Revisão${allDone ? '' : ' 🔒'}`;
-        }
+        ['revisao', 'pronto'].forEach(colId => {
+          const opt = sel.querySelector(`option[value="${colId}"]`);
+          if (opt) {
+            opt.disabled = !allDone;
+            const label = colId === 'revisao' ? 'Revisão' : 'Pronto';
+            opt.textContent = `${label}${allDone ? '' : ' 🔒'}`;
+          }
+        });
       }
 
       // Re-render the card on the board to update mini progress bar
