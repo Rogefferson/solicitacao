@@ -1588,7 +1588,7 @@
     function handlePhotoSelect(e, slot) {
       const file = e.target.files[0];
       if (!file) return;
-      if (file.size > 5 * 1024 * 1024) {
+      if (file.size > 20 * 1024 * 1024) {
         toast(`Foto ${slot} muito grande. Máximo: 20 MB.`, 'error');
         e.target.value = '';
         return;
