@@ -1642,8 +1642,9 @@
     async function init() {
       buildBoard();
       await loadCards();
-      await checkAutoArquivar(); // ← Adicione esta linha aqui
-      await checkAutoAvisos(); // ← regra: ≤14 dias → coluna Avisos
+      await checkAutoExcluirArquivados(); // ← Exclui arquivados com mais de 3 meses
+      await checkAutoArquivar();
+      await checkAutoAvisos();
     }
 
     /* ═══════════════════════════════════════════════
@@ -2281,6 +2282,57 @@
       closeDetailModal();
       toast('Card excluído.', 'success');
       currentId = null;
+    }
+
+    /* ═══════════════════════════════════════════════
+       AUTO-EXCLUIR: apaga cards arquivados com mais de 3 meses
+    ═══════════════════════════════════════════════ */
+    async function checkAutoExcluirArquivados() {
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+
+      const paraExcluir = allCards.filter(card => {
+        if (card.status !== 'arquivado' || !card.data_inicio) return false;
+        const evento = new Date(card.data_inicio + 'T00:00:00');
+        const mesesPassados = (hoje - evento) / (1000 * 60 * 60 * 24 * 30);
+        return mesesPassados >= 3;
+      });
+
+      if (!paraExcluir.length) return;
+
+      for (const card of paraExcluir) {
+        // Apaga fotos do Storage (extrai o nome do arquivo da URL)
+        const fotosParaApagar = [card.foto_url, card.foto_url_2]
+          .filter(Boolean)
+          .map(url => url.split('/fotos-preletores/').pop())
+          .filter(Boolean);
+
+        if (fotosParaApagar.length) {
+          const { error: storageError } = await db.storage
+            .from('fotos-preletores')
+            .remove(fotosParaApagar);
+          if (storageError) {
+            console.warn('Erro ao apagar foto do storage:', storageError.message);
+          }
+        }
+
+        // Apaga o card do banco
+        const { error } = await db.from('cards').delete().eq('id', card.id);
+        if (error) {
+          console.warn('Erro ao excluir card arquivado:', error.message);
+          continue;
+        }
+      }
+
+      // Atualiza estado local
+      const idsExcluidos = new Set(paraExcluir.map(c => c.id));
+      allCards = allCards.filter(c => !idsExcluidos.has(c.id));
+
+      if (paraExcluir.length > 0) {
+        renderAll();
+        updateTotalBadge();
+        console.log(`${paraExcluir.length} card(s) arquivado(s) excluído(s) automaticamente.`);
+      }
     }
 
     /* ═══════════════════════════════════════════════
