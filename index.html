@@ -1422,7 +1422,7 @@
 
         <div class="form-group">
           <label>Fotos do Preletor <span
-              style="color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0">(opcional · máx. 5 MB
+              style="color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0">(opcional · máx. 20 MB
               cada)</span></label>
           <div class="photos-row">
 
@@ -1589,7 +1589,7 @@
       const file = e.target.files[0];
       if (!file) return;
       if (file.size > 5 * 1024 * 1024) {
-        toast(`Foto ${slot} muito grande. Máximo: 5 MB.`, 'error');
+        toast(`Foto ${slot} muito grande. Máximo: 20 MB.`, 'error');
         e.target.value = '';
         return;
       }
