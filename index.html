@@ -2077,7 +2077,7 @@
         const isFull = done === total;
         const noticeHtml = allDone
           ? `<div class="prod-unlocked-notice">✅ Todos os itens concluídos — pode mover para Revisão!</div>`
-          : `<div class="prod-locked-notice">🔒 Conclua todos os itens para liberar a Revisão</div>`;
+          : `<div class="prod-locked-notice">🔒 Conclua todos os itens para mover para revisão ou pronto</div>`;
 
         const items = materiais.map(m => {
           const isDone = concluidos.includes(m);
