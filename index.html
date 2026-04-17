@@ -1013,6 +1013,183 @@
       }
     }
 
+    /* ─── PROGRESS BAR (Em Produção) ─────────── */
+    .card-progress {
+      margin-top: 9px;
+      padding-top: 9px;
+      border-top: 1px solid var(--border);
+    }
+
+    .card-progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+      font-size: .67rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .card-progress-pct {
+      color: var(--gold);
+    }
+
+    .card-progress-bar-bg {
+      height: 5px;
+      background: var(--surface2);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .card-progress-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      transition: width .4s cubic-bezier(.4,0,.2,1);
+    }
+
+    .card-progress-bar-fill.full {
+      background: linear-gradient(90deg, var(--green), #6ee7b7);
+    }
+
+    /* ─── CHECKLIST NO MODAL ─────────────────── */
+    .prod-checklist-wrap {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .prod-checklist-title {
+      font-size: .72rem;
+      font-weight: 800;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .prod-progress-bar-bg {
+      height: 7px;
+      background: var(--bg);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .prod-progress-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      transition: width .4s cubic-bezier(.4,0,.2,1);
+    }
+
+    .prod-progress-bar-fill.full {
+      background: linear-gradient(90deg, var(--green), #6ee7b7);
+    }
+
+    .prod-progress-label {
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .prod-progress-label.full {
+      color: var(--green);
+    }
+
+    .prod-check-item {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 10px 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all .15s;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .prod-check-item:hover {
+      border-color: rgba(244,164,53,.35);
+      background: rgba(244,164,53,.04);
+    }
+
+    .prod-check-item.done {
+      border-color: rgba(52,211,153,.25);
+      background: rgba(52,211,153,.05);
+    }
+
+    .prod-check-box {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      border: 2px solid var(--border2);
+      background: var(--surface2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: .75rem;
+      transition: all .2s;
+    }
+
+    .prod-check-item.done .prod-check-box {
+      background: var(--green);
+      border-color: var(--green);
+      color: #fff;
+    }
+
+    .prod-check-label {
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--text);
+      flex: 1;
+      line-height: 1.35;
+    }
+
+    .prod-check-item.done .prod-check-label {
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+
+    .prod-locked-notice {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--red);
+      background: rgba(248,113,113,.08);
+      border: 1px solid rgba(248,113,113,.2);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+    }
+
+    .prod-unlocked-notice {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--green);
+      background: rgba(52,211,153,.08);
+      border: 1px solid rgba(52,211,153,.2);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+    }
+
     /* ─── CONFIRM DIALOG ─────────────────────── */
     .confirm-overlay {
       position: fixed;
@@ -1588,6 +1765,26 @@
       const dateStr = card.data_inicio ? fmtDate(card.data_inicio) : '—';
       const hora = card.horario ? ' · ' + card.horario.substring(0, 5) : '';
 
+      // Mini progress bar — only when in em_producao and has materiais
+      let progressHtml = '';
+      if (card.status === 'em_producao' && materiais.length > 0) {
+        const concluidos = Array.isArray(card.materiais_concluidos) ? card.materiais_concluidos : [];
+        const done = materiais.filter(m => concluidos.includes(m)).length;
+        const total = materiais.length;
+        const pct = Math.round((done / total) * 100);
+        const isFull = done === total;
+        progressHtml = `
+    <div class="card-progress">
+      <div class="card-progress-header">
+        <span>Progresso</span>
+        <span class="card-progress-pct">${done}/${total}</span>
+      </div>
+      <div class="card-progress-bar-bg">
+        <div class="card-progress-bar-fill ${isFull ? 'full' : ''}" style="width:${pct}%"></div>
+      </div>
+    </div>`;
+      }
+
       el.innerHTML = `
     <div class="card-tema">${esc(card.tema || 'Sem tema')}</div>
     <div class="card-meta">🏛 ${esc(card.departamento || '—')}</div>
@@ -1598,7 +1795,8 @@
       <div class="card-actions">
         <button class="card-btn" title="Excluir" onclick="askDelete(event,'${card.id}')">🗑</button>
       </div>
-    </div>`;
+    </div>
+    ${progressHtml}`;
 
       el.addEventListener('click', e => {
         if (e.target.closest('.card-btn')) return;
@@ -1629,6 +1827,23 @@
           onEnd: async evt => {
             const id = evt.item.dataset.id;
             const newStatus = evt.to.closest('.column').dataset.status;
+            const oldStatus = evt.from.closest('.column').dataset.status;
+
+            // 🔒 Block drag from em_producao to revisao if checklist incomplete
+            if (oldStatus === 'em_producao' && newStatus === 'revisao') {
+              const card = allCards.find(c => c.id === id);
+              if (card) {
+                const materiais = Array.isArray(card.materiais) ? card.materiais : [];
+                const concluidos = Array.isArray(card.materiais_concluidos) ? card.materiais_concluidos : [];
+                const allDone = materiais.length === 0 || materiais.every(m => concluidos.includes(m));
+                if (!allDone) {
+                  // Revert DOM
+                  evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex] || null);
+                  toast('🔒 Conclua todos os itens do checklist antes de mover para Revisão!', 'error');
+                  return;
+                }
+              }
+            }
 
             // ✅ Remove "Sem cards aqui" da coluna de destino
             const emptyDest = evt.to.querySelector('.empty-col');
@@ -1843,9 +2058,57 @@
         return `<span class="tag" style="background:${s.bg};color:${s.fg};font-size:.74rem;padding:4px 9px">${m}</span>`;
       }).join('');
 
-      const statusOpts = COLUMNS.map(c =>
-        `<option value="${c.id}" ${card.status === c.id ? 'selected' : ''}>${c.label}</option>`
-      ).join('');
+      const concluidos = Array.isArray(card.materiais_concluidos) ? card.materiais_concluidos : [];
+      const isEmProducao = card.status === 'em_producao';
+      const total = materiais.length;
+      const done = materiais.filter(m => concluidos.includes(m)).length;
+      const pct = total > 0 ? Math.round((done / total) * 100) : 100;
+      const allDone = total === 0 || done === total;
+
+      // Build status options — block "revisao" if in em_producao and not all done
+      const statusOpts = COLUMNS.map(c => {
+        const isRevisao = c.id === 'revisao';
+        const blocked = isEmProducao && isRevisao && !allDone;
+        return `<option value="${c.id}" ${card.status === c.id ? 'selected' : ''} ${blocked ? 'disabled' : ''}>${c.label}${blocked ? ' 🔒' : ''}</option>`;
+      }).join('');
+
+      // Checklist block (only in em_producao with materiais)
+      let checklistHtml = '';
+      if (isEmProducao && materiais.length > 0) {
+        const isFull = done === total;
+        const noticeHtml = allDone
+          ? `<div class="prod-unlocked-notice">✅ Todos os itens concluídos — pode mover para Revisão!</div>`
+          : `<div class="prod-locked-notice">🔒 Conclua todos os itens para liberar a Revisão</div>`;
+
+        const items = materiais.map(m => {
+          const isDone = concluidos.includes(m);
+          return `<div class="prod-check-item ${isDone ? 'done' : ''}" onclick="toggleMaterialCheck('${card.id}', '${m}', this)">
+            <div class="prod-check-box">${isDone ? '✓' : ''}</div>
+            <span class="prod-check-label">${esc(m)}</span>
+          </div>`;
+        }).join('');
+
+        checklistHtml = `
+        <div class="detail-field full">
+          <div class="detail-label">Checklist de Produção</div>
+          <div class="prod-checklist-wrap">
+            <div class="prod-checklist-title">⬡ Materiais Solicitados</div>
+            <div class="prod-progress-bar-bg">
+              <div class="prod-progress-bar-fill ${isFull ? 'full' : ''}" id="prod-bar-${card.id}" style="width:${pct}%"></div>
+            </div>
+            <div class="prod-progress-label ${isFull ? 'full' : ''}" id="prod-label-${card.id}">${done}/${total} concluídos (${pct}%)</div>
+            ${items}
+            ${noticeHtml}
+          </div>
+        </div>`;
+      } else if (materiais.length > 0) {
+        // Normal tag display for other statuses
+        checklistHtml = `
+        <div class="detail-field full">
+          <div class="detail-label">Materiais Solicitados</div>
+          <div class="detail-tags">${tagsHtml}</div>
+        </div>`;
+      }
 
       document.getElementById('d-body').innerHTML = `
     ${(card.foto_url || card.foto_url_2) ? `
@@ -1888,11 +2151,7 @@
         <div class="detail-label">Preletor(es)</div>
         <div class="detail-val">${esc(card.preletor || '—')}</div>
       </div>
-      ${materiais.length ? `
-      <div class="detail-field full">
-        <div class="detail-label">Materiais Solicitados</div>
-        <div class="detail-tags">${tagsHtml}</div>
-      </div>` : ''}
+      ${checklistHtml}
       <div class="detail-field full">
         <div class="detail-label">Observações</div>
         <div class="detail-val" style="white-space:pre-wrap">${esc(card.observacoes || '—')}</div>
@@ -1922,6 +2181,75 @@
     function closeDetailModal() {
       document.getElementById('detailOverlay').classList.remove('active');
       currentId = null;
+    }
+
+    /* ═══════════════════════════════════════════════
+       TOGGLE MATERIAL CHECK (Em Produção)
+    ═══════════════════════════════════════════════ */
+    async function toggleMaterialCheck(cardId, material, el) {
+      const card = allCards.find(c => c.id === cardId);
+      if (!card) return;
+
+      let concluidos = Array.isArray(card.materiais_concluidos) ? [...card.materiais_concluidos] : [];
+      const idx = concluidos.indexOf(material);
+
+      if (idx === -1) {
+        concluidos.push(material);
+      } else {
+        concluidos.splice(idx, 1);
+      }
+
+      const { error } = await db.from('cards')
+        .update({ materiais_concluidos: concluidos })
+        .eq('id', cardId);
+
+      if (error) { toast('Erro ao salvar progresso: ' + error.message, 'error'); return; }
+
+      // Update local state
+      card.materiais_concluidos = concluidos;
+
+      // Update the clicked item UI
+      const isDone = concluidos.includes(material);
+      el.classList.toggle('done', isDone);
+      el.querySelector('.prod-check-box').textContent = isDone ? '✓' : '';
+
+      // Update progress bar & label in modal
+      const materiais = Array.isArray(card.materiais) ? card.materiais : [];
+      const total = materiais.length;
+      const done = materiais.filter(m => concluidos.includes(m)).length;
+      const pct = total > 0 ? Math.round((done / total) * 100) : 100;
+      const allDone = done === total;
+
+      const bar = document.getElementById(`prod-bar-${cardId}`);
+      const label = document.getElementById(`prod-label-${cardId}`);
+      if (bar) { bar.style.width = pct + '%'; bar.classList.toggle('full', allDone); }
+      if (label) { label.textContent = `${done}/${total} concluídos (${pct}%)`; label.classList.toggle('full', allDone); }
+
+      // Update notice
+      const noticeEl = el.closest('.prod-checklist-wrap')?.querySelector('.prod-locked-notice, .prod-unlocked-notice');
+      if (noticeEl) {
+        if (allDone) {
+          noticeEl.className = 'prod-unlocked-notice';
+          noticeEl.textContent = '✅ Todos os itens concluídos — pode mover para Revisão!';
+        } else {
+          noticeEl.className = 'prod-locked-notice';
+          noticeEl.textContent = '🔒 Conclua todos os itens para liberar a Revisão';
+        }
+      }
+
+      // Update the "Mover para coluna" select — unlock/lock Revisão
+      const sel = document.querySelector('#d-body select');
+      if (sel) {
+        const revisaoOpt = sel.querySelector('option[value="revisao"]');
+        if (revisaoOpt) {
+          revisaoOpt.disabled = !allDone;
+          revisaoOpt.textContent = `Revisão${allDone ? '' : ' 🔒'}`;
+        }
+      }
+
+      // Re-render the card on the board to update mini progress bar
+      renderAll();
+      initSortable();
     }
 
     /* ═══════════════════════════════════════════════
