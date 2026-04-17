@@ -1047,7 +1047,7 @@
       height: 100%;
       border-radius: 99px;
       background: linear-gradient(90deg, var(--gold), var(--gold-light));
-      transition: width .4s cubic-bezier(.4,0,.2,1);
+      transition: width .4s cubic-bezier(.4, 0, .2, 1);
     }
 
     .card-progress-bar-fill.full {
@@ -1089,7 +1089,7 @@
       height: 100%;
       border-radius: 99px;
       background: linear-gradient(90deg, var(--gold), var(--gold-light));
-      transition: width .4s cubic-bezier(.4,0,.2,1);
+      transition: width .4s cubic-bezier(.4, 0, .2, 1);
     }
 
     .prod-progress-bar-fill.full {
@@ -1122,13 +1122,13 @@
     }
 
     .prod-check-item:hover {
-      border-color: rgba(244,164,53,.35);
-      background: rgba(244,164,53,.04);
+      border-color: rgba(244, 164, 53, .35);
+      background: rgba(244, 164, 53, .04);
     }
 
     .prod-check-item.done {
-      border-color: rgba(52,211,153,.25);
-      background: rgba(52,211,153,.05);
+      border-color: rgba(52, 211, 153, .25);
+      background: rgba(52, 211, 153, .05);
     }
 
     .prod-check-box {
@@ -1171,8 +1171,8 @@
       font-size: .78rem;
       font-weight: 700;
       color: var(--red);
-      background: rgba(248,113,113,.08);
-      border: 1px solid rgba(248,113,113,.2);
+      background: rgba(248, 113, 113, .08);
+      border: 1px solid rgba(248, 113, 113, .2);
       border-radius: var(--radius-sm);
       padding: 9px 12px;
     }
@@ -1184,8 +1184,8 @@
       font-size: .78rem;
       font-weight: 700;
       color: var(--green);
-      background: rgba(52,211,153,.08);
-      border: 1px solid rgba(52,211,153,.2);
+      background: rgba(52, 211, 153, .08);
+      border: 1px solid rgba(52, 211, 153, .2);
       border-radius: var(--radius-sm);
       padding: 9px 12px;
     }
@@ -1839,7 +1839,7 @@
                 if (!allDone) {
                   // Revert DOM
                   evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex] || null);
-                  toast('🔒 Conclua todos os itens do checklist antes de mover para Revisão!', 'error');
+                  toast('🔒 Conclua todos os itens do checklist antes de mover para Revisão ou Pronto!', 'error');
                   return;
                 }
               }
