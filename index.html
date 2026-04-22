@@ -2614,19 +2614,44 @@
 
     function buildFeedbackRevisaoHtml(card) {
       const historico = Array.isArray(card.historico_revisao) ? card.historico_revisao : [];
-      // Pega apenas os ajustes (comentários de correção)
-      const ajustes = historico.filter(h => h.tipo === 'ajuste');
-      if (!ajustes.length) return '';
+      if (!historico.length) return '';
 
-      const items = ajustes.map((h, i) => `
-        <div class="historico-item ajuste">
+      // Último ajuste pendente (para destacar o que precisa ser feito agora)
+      const ultimoAjuste = [...historico].reverse().find(h => h.tipo === 'ajuste');
+      if (!ultimoAjuste) return ''; // Só mostra se houver pelo menos um ajuste
+
+      // Todos os itens do histórico em ordem
+      const itensHtml = historico.map((h, i) => {
+        const isAjuste = h.tipo === 'ajuste';
+        return `
+        <div class="historico-item ${h.tipo}">
           <div class="historico-item-header">
-            🔄 Ajuste solicitado
-            <span style="font-weight:400;color:var(--text-muted)">· Rodada ${historico.indexOf(h) + 1}</span>
+            ${isAjuste ? '🔄 Ajuste Solicitado' : '✅ Aprovado'}
+            <span style="font-weight:400;color:var(--text-muted)">· Rodada ${i + 1}</span>
           </div>
           <div class="historico-item-meta">👤 ${esc(h.nome)} · 📅 ${h.data}</div>
           ${h.comentario ? `<div class="historico-item-comentario">${esc(h.comentario)}</div>` : ''}
-        </div>`).join('');
+        </div>`;
+      }).join('');
+
+      function fichaArquivo(url, nome, slot) {
+        if (!url) return '';
+        const ext  = (nome || '').split('.').pop().toUpperCase();
+        const icon = ['JPG','JPEG','PNG','WEBP','GIF'].includes(ext) ? '🖼️'
+                   : ['MP4','MOV','AVI','WEBM'].includes(ext) ? '🎬'
+                   : ext === 'PDF' ? '📄' : '📎';
+        return `
+          <div class="revisao-file-current" style="flex-direction:column;align-items:flex-start;gap:6px">
+            <div style="display:flex;align-items:center;gap:6px;width:100%;min-width:0">
+              <span class="revisao-file-icon">${icon}</span>
+              <div class="revisao-file-info">
+                <div class="revisao-file-name">${esc(nome || `Arquivo ${slot}`)}</div>
+                <div class="revisao-file-meta">${ext} · Arte ${slot}</div>
+              </div>
+            </div>
+            <a class="btn-download" href="${esc(url)}" target="_blank" download style="width:100%;justify-content:center">⬇ Baixar</a>
+          </div>`;
+      }
 
       return `
       <div class="detail-field full">
@@ -2639,38 +2664,26 @@
           padding: 13px 14px;
           display: flex;
           flex-direction: column;
-          gap: 10px;
+          gap: 12px;
         ">
           <div style="font-size:.75rem;font-weight:800;color:var(--orange);text-transform:uppercase;letter-spacing:.06em;">
-            🔄 O que precisa ser ajustado
+            🔄 Último ajuste pendente — ${esc(ultimoAjuste.nome)} · ${ultimoAjuste.data}
           </div>
-          <div class="historico-wrap">${items}</div>
-          ${(card.arquivo_revisao_url || card.arquivo_revisao_url_2) ? (() => {
-            function fichaArquivo(url, nome, slot) {
-              if (!url) return '';
-              const ext  = (nome || '').split('.').pop().toUpperCase();
-              const icon = ['JPG','JPEG','PNG','WEBP','GIF'].includes(ext) ? '🖼️'
-                         : ['MP4','MOV','AVI','WEBM'].includes(ext) ? '🎬'
-                         : ext === 'PDF' ? '📄' : '📎';
-              return `
-                <div class="revisao-file-current">
-                  <span class="revisao-file-icon">${icon}</span>
-                  <div class="revisao-file-info">
-                    <div class="revisao-file-name">${esc(nome || `Arquivo ${slot}`)}</div>
-                    <div class="revisao-file-meta">${ext} · Arte ${slot}</div>
-                  </div>
-                  <a class="btn-download" href="${esc(url)}" target="_blank" download style="flex-shrink:0">⬇ Baixar</a>
-                </div>`;
-            }
-            return `
-            <div style="font-size:.72rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px">
-              Artes enviadas para revisão
-            </div>
-            <div style="display:flex;flex-direction:column;gap:6px">
-              ${fichaArquivo(card.arquivo_revisao_url,   card.arquivo_revisao_nome,   1)}
-              ${fichaArquivo(card.arquivo_revisao_url_2, card.arquivo_revisao_nome_2, 2)}
-            </div>`;
-          })() : ''}
+          ${ultimoAjuste.comentario ? `<div class="historico-item-comentario" style="margin-top:-4px">${esc(ultimoAjuste.comentario)}</div>` : ''}
+
+          <div style="font-size:.72rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;padding-top:4px;border-top:1px solid var(--border)">
+            📋 Histórico completo (${historico.length} rodada${historico.length !== 1 ? 's' : ''})
+          </div>
+          <div class="historico-wrap">${itensHtml}</div>
+
+          ${(card.arquivo_revisao_url || card.arquivo_revisao_url_2) ? `
+          <div style="font-size:.72rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;padding-top:4px;border-top:1px solid var(--border)">
+            Artes enviadas para revisão
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;min-width:0">
+            ${fichaArquivo(card.arquivo_revisao_url,   card.arquivo_revisao_nome,   1)}
+            ${fichaArquivo(card.arquivo_revisao_url_2, card.arquivo_revisao_nome_2, 2)}
+          </div>` : ''}
         </div>
       </div>`;
     }
