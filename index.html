@@ -2623,7 +2623,7 @@
           <div class="revisao-section-title" style="margin-top:4px">✍️ Aprovação do Solicitante</div>
 
           <div class="revisao-actions" id="rev-actions-${card.id}">
-            <button class="btn-aprovar" onclick="showRevisaoForm('${card.id}','aprovado')">✅ Aprovar Arte</button>
+            ${ultimoStatus !== 'aprovado' ? `<button class="btn-aprovar" onclick="showRevisaoForm('${card.id}','aprovado')">✅ Aprovar Arte</button>` : ''}
             <button class="btn-ajuste" onclick="showRevisaoForm('${card.id}','ajuste')">🔄 Solicitar Ajuste</button>
           </div>
 
