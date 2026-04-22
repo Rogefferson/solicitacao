@@ -2523,19 +2523,21 @@
                    : ['MP4','MOV','AVI','WEBM'].includes(ext) ? '🎬'
                    : ext === 'PDF' ? '📄' : '📎';
         fichaHtml = `
-          <div class="revisao-file-current" style="margin-top:6px">
-            <span class="revisao-file-icon">${icon}</span>
-            <div class="revisao-file-info">
-              <div class="revisao-file-name">${esc(nome)}</div>
-              <div class="revisao-file-meta">${ext} · Slot ${slot}</div>
+          <div class="revisao-file-current" style="margin-top:6px;flex-direction:column;align-items:flex-start;gap:6px">
+            <div style="display:flex;align-items:center;gap:6px;width:100%;min-width:0">
+              <span class="revisao-file-icon">${icon}</span>
+              <div class="revisao-file-info">
+                <div class="revisao-file-name">${esc(nome)}</div>
+                <div class="revisao-file-meta">${ext} · Slot ${slot}</div>
+              </div>
             </div>
-            <a class="btn-download" href="${esc(url)}" target="_blank" download style="flex-shrink:0">⬇ Baixar</a>
+            <a class="btn-download" href="${esc(url)}" target="_blank" download style="width:100%;justify-content:center">⬇ Baixar</a>
           </div>`;
       }
 
       return `
-        <div>
-          <div style="font-size:.7rem;font-weight:800;color:var(--text-muted);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px">
+        <div style="min-width:0;overflow:hidden">
+          <div style="font-size:.7rem;font-weight:800;color:var(--text-muted);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
             ${label}
           </div>
           <div class="revisao-upload-area" id="rev-upload-area-${card.id}-${slot}">
@@ -2723,12 +2725,14 @@
 
       const updates = { historico_revisao: historico };
       if (tipo === 'ajuste') updates.status = 'em_producao';
+      if (tipo === 'aprovado') updates.status = 'pronto';
 
       const { error } = await db.from('cards').update(updates).eq('id', cardId);
       if (error) { toast('Erro ao salvar: ' + error.message, 'error'); return; }
 
       card.historico_revisao = historico;
       if (tipo === 'ajuste') card.status = 'em_producao';
+      if (tipo === 'aprovado') card.status = 'pronto';
 
       renderAll();
       initSortable();
@@ -2736,7 +2740,7 @@
       closeDetailModal();
 
       if (tipo === 'aprovado') {
-        toast(`✅ Arte aprovada por ${nome}!`, 'success');
+        toast(`✅ Arte aprovada por ${nome}! Card movido para Pronto.`, 'success');
       } else {
         toast(`🔄 Ajuste solicitado por ${nome}. Card voltou para Em Produção.`, 'success');
       }
