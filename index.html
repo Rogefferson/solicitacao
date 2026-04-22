@@ -2065,6 +2065,13 @@
       if (last.tipo === 'ajuste') return `<div class="card-meta" style="color:var(--orange)">🔄 Ajuste solicitado · ${last.nome}</div>`;
       return '';
     })() : ''}
+    ${card.status === 'em_producao' ? (() => {
+      const hist = Array.isArray(card.historico_revisao) ? card.historico_revisao : [];
+      const ajustes = hist.filter(h => h.tipo === 'ajuste');
+      if (!ajustes.length) return '';
+      const ultimo = ajustes[ajustes.length - 1];
+      return `<div class="card-meta" style="color:var(--orange);font-weight:800">⚠️ Ajuste pendente · ${esc(ultimo.nome)}</div>`;
+    })() : ''}
     <div class="card-footer">
       <div class="card-tags">${tagsHtml}</div>
       <div class="card-actions">
@@ -2427,6 +2434,7 @@
       </div>
       ${checklistHtml}
       ${card.status === 'revisao' ? buildRevisaoHtml(card) : ''}
+      ${card.status === 'em_producao' ? buildFeedbackRevisaoHtml(card) : ''}
       <div class="detail-field full">
         <div class="detail-label">Observações</div>
         <div class="detail-val" style="white-space:pre-wrap">${esc(card.observacoes || '—')}</div>
@@ -2529,6 +2537,61 @@
           <div id="rev-form-${card.id}" style="display:none"></div>
 
           ${historico.length ? `<div class="revisao-section-title" style="margin-top:4px">📋 Histórico</div>${historicoHtml}` : ''}
+        </div>
+      </div>`;
+    }
+
+    function buildFeedbackRevisaoHtml(card) {
+      const historico = Array.isArray(card.historico_revisao) ? card.historico_revisao : [];
+      // Pega apenas os ajustes (comentários de correção)
+      const ajustes = historico.filter(h => h.tipo === 'ajuste');
+      if (!ajustes.length) return '';
+
+      const items = ajustes.map((h, i) => `
+        <div class="historico-item ajuste">
+          <div class="historico-item-header">
+            🔄 Ajuste solicitado
+            <span style="font-weight:400;color:var(--text-muted)">· Rodada ${historico.indexOf(h) + 1}</span>
+          </div>
+          <div class="historico-item-meta">👤 ${esc(h.nome)} · 📅 ${h.data}</div>
+          ${h.comentario ? `<div class="historico-item-comentario">${esc(h.comentario)}</div>` : ''}
+        </div>`).join('');
+
+      return `
+      <div class="detail-field full">
+        <div class="detail-label">⚠️ Feedback da Revisão</div>
+        <div style="
+          background: rgba(251,146,60,.07);
+          border: 1px solid rgba(251,146,60,.25);
+          border-left: 4px solid var(--orange);
+          border-radius: var(--radius);
+          padding: 13px 14px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        ">
+          <div style="font-size:.75rem;font-weight:800;color:var(--orange);text-transform:uppercase;letter-spacing:.06em;">
+            🔄 O que precisa ser ajustado
+          </div>
+          <div class="historico-wrap">${items}</div>
+          ${card.arquivo_revisao_url ? (() => {
+            const nome = card.arquivo_revisao_nome || 'Arquivo da revisão';
+            const ext = nome.split('.').pop().toUpperCase();
+            const isImg = ['JPG','JPEG','PNG','WEBP','GIF'].includes(ext);
+            const icon = isImg ? '🖼️' : (ext === 'PDF' ? '📄' : (['MP4','MOV','AVI'].includes(ext) ? '🎬' : '📎'));
+            return `
+            <div style="font-size:.72rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px">
+              Arte enviada para revisão
+            </div>
+            <div class="revisao-file-current">
+              <span class="revisao-file-icon">${icon}</span>
+              <div class="revisao-file-info">
+                <div class="revisao-file-name">${esc(nome)}</div>
+                <div class="revisao-file-meta">${ext} · Versão anterior</div>
+              </div>
+              <a class="btn-download" href="${esc(card.arquivo_revisao_url)}" target="_blank" download style="flex-shrink:0">⬇ Baixar</a>
+            </div>`;
+          })() : ''}
         </div>
       </div>`;
     }
