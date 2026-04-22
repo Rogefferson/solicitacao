@@ -2111,17 +2111,23 @@
             const newStatus = evt.to.closest('.column').dataset.status;
             const oldStatus = evt.from.closest('.column').dataset.status;
 
-            // 🔒 Block drag from em_producao to revisao or pronto if checklist incomplete
-            if (oldStatus === 'em_producao' && (newStatus === 'revisao' || newStatus === 'pronto')) {
+            // 🔒 Bloqueia arrastar de Em Produção direto para Pronto
+            if (oldStatus === 'em_producao' && newStatus === 'pronto') {
+              evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex] || null);
+              toast('🔒 O card precisa passar pela Revisão antes de ir para Pronto!', 'error');
+              return;
+            }
+
+            // 🔒 Bloqueia arrastar de Em Produção para Revisão se checklist incompleto
+            if (oldStatus === 'em_producao' && newStatus === 'revisao') {
               const card = allCards.find(c => c.id === id);
               if (card) {
                 const materiais = Array.isArray(card.materiais) ? card.materiais : [];
                 const concluidos = Array.isArray(card.materiais_concluidos) ? card.materiais_concluidos : [];
                 const allDone = materiais.length === 0 || materiais.every(m => concluidos.includes(m));
                 if (!allDone) {
-                  // Revert DOM
                   evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex] || null);
-                  toast('🔒 Conclua todos os itens do checklist antes de mover para Revisão ou Pronto!', 'error');
+                  toast('🔒 Conclua todos os itens do checklist antes de mover para Revisão!', 'error');
                   return;
                 }
               }
@@ -2347,10 +2353,15 @@
       const pct = total > 0 ? Math.round((done / total) * 100) : 100;
       const allDone = total === 0 || done === total;
 
-      // Build status options — block "revisao" and "pronto" if in em_producao and not all done
+      // Build status options — em_producao só pode ir para revisao (se checklist ok), pronto bloqueado sempre
       const statusOpts = COLUMNS.map(c => {
-        const isBlocked = isEmProducao && (c.id === 'revisao' || c.id === 'pronto') && !allDone;
-        return `<option value="${c.id}" ${card.status === c.id ? 'selected' : ''} ${isBlocked ? 'disabled' : ''}>${c.label}${isBlocked ? ' 🔒' : ''}</option>`;
+        const bloqueadoPorChecklist = isEmProducao && c.id === 'revisao' && !allDone;
+        const bloqueadoPronto       = isEmProducao && c.id === 'pronto';
+        const isBlocked = bloqueadoPorChecklist || bloqueadoPronto;
+        let label = c.label;
+        if (bloqueadoPorChecklist) label += ' 🔒';
+        if (bloqueadoPronto)       label += ' 🔒';
+        return `<option value="${c.id}" ${card.status === c.id ? 'selected' : ''} ${isBlocked ? 'disabled' : ''}>${label}</option>`;
       }).join('');
 
       // Checklist block (only in em_producao with materiais)
@@ -2359,7 +2370,7 @@
         const isFull = done === total;
         const noticeHtml = allDone
           ? `<div class="prod-unlocked-notice">✅ Todos os itens concluídos — pode mover para Revisão!</div>`
-          : `<div class="prod-locked-notice">🔒 Conclua todos os itens para mover para revisão ou pronto</div>`;
+          : `<div class="prod-locked-notice">🔒 Conclua todos os itens para mover para Revisão</div>`;
 
         const items = materiais.map(m => {
           const isDone = concluidos.includes(m);
@@ -2391,22 +2402,59 @@
         </div>`;
       }
 
+      const colunasFinais = ['pronto', 'avisos', 'arquivado'];
+
+      function makeArteItem(url, nome, label) {
+        if (!url) return '';
+        const ext  = (nome || '').split('.').pop().toUpperCase();
+        const isImg = ['JPG','JPEG','PNG','WEBP','GIF'].includes(ext);
+        const icon = isImg ? null : (['MP4','MOV','AVI','WEBM'].includes(ext) ? '🎬' : ext === 'PDF' ? '📄' : '📎');
+        return `
+        <div class="detail-photo-item">
+          ${isImg
+            ? `<img src="${esc(url)}" alt="${label}" />`
+            : `<div style="width:80px;height:80px;border-radius:50%;border:2px solid var(--gold);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:2rem">${icon}</div>`
+          }
+          <span>${label}</span>
+          <a class="btn-download" href="${esc(url)}" download target="_blank">⬇ Baixar</a>
+        </div>`;
+      }
+
+      const temArtesRevisao = card.arquivo_revisao_url || card.arquivo_revisao_url_2;
+
+      let topBlockHtml = '';
+      if (colunasFinais.includes(card.status) && temArtesRevisao) {
+        const hist = Array.isArray(card.historico_revisao) ? card.historico_revisao : [];
+        const aprovacao = [...hist].reverse().find(h => h.tipo === 'aprovado');
+        topBlockHtml = `
+        <div style="background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.25);border-radius:var(--radius);padding:14px;display:flex;flex-direction:column;gap:10px;margin-bottom:4px">
+          <div style="font-size:.72rem;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.07em">✅ Artes Aprovadas</div>
+          <div class="detail-photos-wrap" style="padding:0">
+            ${makeArteItem(card.arquivo_revisao_url,   card.arquivo_revisao_nome,   'Arte 1')}
+            ${makeArteItem(card.arquivo_revisao_url_2, card.arquivo_revisao_nome_2, 'Arte 2')}
+          </div>
+          ${aprovacao ? `<div style="font-size:.72rem;color:var(--text-muted)">Aprovado por <strong style="color:var(--text)">${esc(aprovacao.nome)}</strong> em ${aprovacao.data}</div>` : ''}
+        </div>`;
+      } else if (card.foto_url || card.foto_url_2) {
+        topBlockHtml = `
+        <div class="detail-photos-wrap">
+          ${card.foto_url ? `
+          <div class="detail-photo-item">
+            <img src="${esc(card.foto_url)}" alt="Foto 1" />
+            <span>Foto 1</span>
+            <a class="btn-download" href="${esc(card.foto_url)}" download target="_blank">⬇ Baixar</a>
+          </div>` : ''}
+          ${card.foto_url_2 ? `
+          <div class="detail-photo-item">
+            <img src="${esc(card.foto_url_2)}" alt="Foto 2" />
+            <span>Foto 2</span>
+            <a class="btn-download" href="${esc(card.foto_url_2)}" download target="_blank">⬇ Baixar</a>
+          </div>` : ''}
+        </div>`;
+      }
+
       document.getElementById('d-body').innerHTML = `
-    ${(card.foto_url || card.foto_url_2) ? `
-    <div class="detail-photos-wrap">
-      ${card.foto_url ? `
-      <div class="detail-photo-item">
-        <img src="${esc(card.foto_url)}" alt="Foto 1" />
-        <span>Foto 1</span>
-        <a class="btn-download" href="${esc(card.foto_url)}" download target="_blank">⬇ Baixar</a>
-      </div>` : ''}
-      ${card.foto_url_2 ? `
-      <div class="detail-photo-item">
-        <img src="${esc(card.foto_url_2)}" alt="Foto 2" />
-        <span>Foto 2</span>
-        <a class="btn-download" href="${esc(card.foto_url_2)}" download target="_blank">⬇ Baixar</a>
-      </div>` : ''}
-    </div>` : ''}
+    ${topBlockHtml}
     <div class="detail-grid">
       <div class="detail-field">
         <div class="detail-label">Departamento</div>
@@ -2803,17 +2851,20 @@
         }
       }
 
-      // Update the "Mover para coluna" select — unlock/lock Revisão e Pronto
+      // Update the "Mover para coluna" select — unlock/lock apenas Revisão (Pronto sempre bloqueado de Em Produção)
       const sel = document.querySelector('#d-body select');
       if (sel) {
-        ['revisao', 'pronto'].forEach(colId => {
-          const opt = sel.querySelector(`option[value="${colId}"]`);
-          if (opt) {
-            opt.disabled = !allDone;
-            const label = colId === 'revisao' ? 'Revisão' : 'Pronto';
-            opt.textContent = `${label}${allDone ? '' : ' 🔒'}`;
-          }
-        });
+        const optRevisao = sel.querySelector('option[value="revisao"]');
+        if (optRevisao) {
+          optRevisao.disabled = !allDone;
+          optRevisao.textContent = `Revisão${allDone ? '' : ' 🔒'}`;
+        }
+        // Pronto sempre bloqueado quando em Em Produção
+        const optPronto = sel.querySelector('option[value="pronto"]');
+        if (optPronto) {
+          optPronto.disabled = true;
+          optPronto.textContent = 'Pronto 🔒';
+        }
       }
 
       // Re-render the card on the board to update mini progress bar
