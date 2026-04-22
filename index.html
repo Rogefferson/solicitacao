@@ -2128,6 +2128,18 @@
               return;
             }
 
+            // 🔒 Bloqueia arrastar de Revisão para Pronto sem aprovação no histórico
+            if (oldStatus === 'revisao' && newStatus === 'pronto') {
+              const card = allCards.find(c => c.id === id);
+              const hist = Array.isArray(card?.historico_revisao) ? card.historico_revisao : [];
+              const ultimoStatus = hist.length ? hist[hist.length - 1].tipo : null;
+              if (ultimoStatus !== 'aprovado') {
+                evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex] || null);
+                toast('🔒 A arte precisa ser aprovada pelo solicitante antes de ir para Pronto!', 'error');
+                return;
+              }
+            }
+
             // 🔒 Bloqueia arrastar de Em Produção para Revisão se checklist incompleto
             if (oldStatus === 'em_producao' && newStatus === 'revisao') {
               const card = allCards.find(c => c.id === id);
@@ -2364,13 +2376,20 @@
       const allDone = total === 0 || done === total;
 
       // Build status options — em_producao só pode ir para revisao (se checklist ok), pronto bloqueado sempre
+      const isRevisao = card.status === 'revisao';
+      const histRevisao = Array.isArray(card.historico_revisao) ? card.historico_revisao : [];
+      const ultimoHistTipo = histRevisao.length ? histRevisao[histRevisao.length - 1].tipo : null;
+      const revisaoNaoAprovada = isRevisao && ultimoHistTipo !== 'aprovado';
+
       const statusOpts = COLUMNS.map(c => {
-        const bloqueadoPorChecklist = isEmProducao && c.id === 'revisao' && !allDone;
-        const bloqueadoPronto       = isEmProducao && c.id === 'pronto';
-        const isBlocked = bloqueadoPorChecklist || bloqueadoPronto;
+        const bloqueadoPorChecklist  = isEmProducao && c.id === 'revisao' && !allDone;
+        const bloqueadoPronto        = isEmProducao && c.id === 'pronto';
+        const bloqueadoProntoRevisao = revisaoNaoAprovada && c.id === 'pronto';
+        const isBlocked = bloqueadoPorChecklist || bloqueadoPronto || bloqueadoProntoRevisao;
         let label = c.label;
-        if (bloqueadoPorChecklist) label += ' 🔒';
-        if (bloqueadoPronto)       label += ' 🔒';
+        if (bloqueadoPorChecklist)  label += ' 🔒';
+        if (bloqueadoPronto)        label += ' 🔒';
+        if (bloqueadoProntoRevisao) label += ' 🔒';
         return `<option value="${c.id}" ${card.status === c.id ? 'selected' : ''} ${isBlocked ? 'disabled' : ''}>${label}</option>`;
       }).join('');
 
@@ -2500,6 +2519,10 @@
       <div class="detail-field full">
         <div class="detail-label">Mover para coluna</div>
         <select onchange="moveCard('${card.id}', this.value)">${statusOpts}</select>
+        ${revisaoNaoAprovada ? `
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding:10px 12px;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25);border-left:3px solid var(--red);border-radius:var(--radius-sm);font-size:.78rem;font-weight:700;color:var(--red);">
+          🔒 O card só pode ir para <strong style="margin:0 2px">Pronto</strong> após o solicitante aprovar a arte na seção de Revisão abaixo.
+        </div>` : ''}
       </div>
     </div>`;
 
