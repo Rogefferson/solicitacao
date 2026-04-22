@@ -2079,7 +2079,10 @@
       const hist = Array.isArray(card.historico_revisao) ? card.historico_revisao : [];
       const ultimo = hist.length ? hist[hist.length - 1] : null;
       if (!ultimo || ultimo.tipo !== 'ajuste') return '';
-      return `<div class="card-meta" style="color:var(--orange);font-weight:800">⚠️ Ajuste pendente · ${esc(ultimo.nome)}</div>`;
+      const artesTag = ultimo.artes_ajuste && ultimo.artes_ajuste.length
+        ? ` <span style="background:rgba(251,146,60,.15);color:var(--orange);border-radius:4px;padding:1px 6px;font-size:.65rem;font-weight:800">${ultimo.artes_ajuste.join(' · ')}</span>`
+        : '';
+      return `<div class="card-meta" style="color:var(--orange);font-weight:800">⚠️ Ajuste pendente · ${esc(ultimo.nome)}${artesTag}</div>`;
     })() : ''}
     <div class="card-footer">
       <div class="card-tags">${tagsHtml}</div>
@@ -2519,8 +2522,8 @@
         <div class="detail-label">Mover para coluna</div>
         <select onchange="moveCard('${card.id}', this.value)">${statusOpts}</select>
         ${revisaoNaoAprovada ? `
-        <div style="margin-top:8px;padding:10px 12px;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25);border-left:3px solid var(--red);border-radius:var(--radius-sm);font-size:.78rem;font-weight:700;color:var(--red);line-height:1.5;">
-          🔒 O card só pode ir para <strong>Pronto</strong> após o solicitante aprovar a arte na seção de Revisão abaixo.
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding:10px 12px;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25);border-left:3px solid var(--red);border-radius:var(--radius-sm);font-size:.78rem;font-weight:700;color:var(--red);">
+          🔒 O card só pode ir para <strong style="margin:0 2px">Pronto</strong> após o solicitante aprovar a arte na seção de Revisão abaixo.
         </div>` : ''}
       </div>
     </div>`;
@@ -2592,6 +2595,7 @@
               <span style="font-weight:400;color:var(--text-muted)">· Rodada ${i + 1}</span>
             </div>
             <div class="historico-item-meta">👤 ${esc(h.nome)} · 📅 ${h.data}</div>
+            ${h.artes_ajuste && h.artes_ajuste.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">${h.artes_ajuste.map(a => `<span style="background:rgba(251,146,60,.15);color:var(--orange);border-radius:4px;padding:2px 7px;font-size:.68rem;font-weight:800">${a}</span>`).join('')}</div>` : ''}
             ${h.comentario ? `<div class="historico-item-comentario">${esc(h.comentario)}</div>` : ''}
           </div>`).join('');
         historicoHtml = `
@@ -2692,6 +2696,11 @@
             🔄 Último ajuste pendente — ${esc(ultimoAjuste.nome)} · ${ultimoAjuste.data}
           </div>
           ${ultimoAjuste.comentario ? `<div class="historico-item-comentario" style="margin-top:-4px">${esc(ultimoAjuste.comentario)}</div>` : ''}
+          ${ultimoAjuste.artes_ajuste && ultimoAjuste.artes_ajuste.length ? `
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-size:.72rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Artes a ajustar:</span>
+            ${ultimoAjuste.artes_ajuste.map(a => `<span style="background:rgba(251,146,60,.18);color:var(--orange);border:1px solid rgba(251,146,60,.35);border-radius:6px;padding:3px 10px;font-size:.74rem;font-weight:800">${a}</span>`).join('')}
+          </div>` : ''}
 
           <div style="font-size:.72rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;padding-top:4px;border-top:1px solid var(--border)">
             📋 Histórico completo (${historico.length} rodada${historico.length !== 1 ? 's' : ''})
@@ -2725,6 +2734,17 @@
           </div>
           ${!isAprovado ? `
           <div>
+            <label>Qual(is) arte(s) precisam de ajuste? *</label>
+            <div style="display:flex;gap:10px;margin-top:8px;">
+              <label style="display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;cursor:pointer;font-size:.88rem;font-weight:600;color:var(--text);text-transform:none;letter-spacing:0;flex:1">
+                <input type="checkbox" id="rev-arte1-${cardId}" style="width:16px;height:16px;accent-color:var(--orange);padding:0;border:none;background:none" /> Arte 1
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;cursor:pointer;font-size:.88rem;font-weight:600;color:var(--text);text-transform:none;letter-spacing:0;flex:1">
+                <input type="checkbox" id="rev-arte2-${cardId}" style="width:16px;height:16px;accent-color:var(--orange);padding:0;border:none;background:none" /> Arte 2
+              </label>
+            </div>
+          </div>
+          <div>
             <label>O que deve ser ajustado? *</label>
             <textarea id="rev-comentario-${cardId}" placeholder="Descreva o que precisa ser alterado…" style="margin-top:5px"></textarea>
           </div>` : ''}
@@ -2749,14 +2769,21 @@
 
       const comentarioEl = document.getElementById(`rev-comentario-${cardId}`);
       const comentario = comentarioEl ? comentarioEl.value.trim() : '';
-      if (tipo === 'ajuste' && !comentario) { toast('Descreva o que precisa ser ajustado.', 'error'); return; }
+
+      let artesAjuste = [];
+      if (tipo === 'ajuste') {
+        if (document.getElementById(`rev-arte1-${cardId}`)?.checked) artesAjuste.push('Arte 1');
+        if (document.getElementById(`rev-arte2-${cardId}`)?.checked) artesAjuste.push('Arte 2');
+        if (!artesAjuste.length) { toast('Selecione qual(is) arte(s) precisam de ajuste.', 'error'); return; }
+        if (!comentario) { toast('Descreva o que precisa ser ajustado.', 'error'); return; }
+      }
 
       const card = allCards.find(c => c.id === cardId);
       if (!card) return;
 
       const hoje = new Date().toLocaleDateString('pt-BR');
       const historico = Array.isArray(card.historico_revisao) ? [...card.historico_revisao] : [];
-      historico.push({ tipo, nome, data: hoje, comentario: comentario || null });
+      historico.push({ tipo, nome, data: hoje, comentario: comentario || null, artes_ajuste: artesAjuste.length ? artesAjuste : null });
 
       const updates = { historico_revisao: historico };
       if (tipo === 'ajuste') updates.status = 'em_producao';
