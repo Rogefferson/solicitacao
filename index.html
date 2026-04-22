@@ -1438,25 +1438,35 @@
     .revisao-file-current {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       background: var(--card-bg);
       border: 1px solid var(--border2);
       border-radius: var(--radius-sm);
-      padding: 10px 13px;
+      padding: 8px 10px;
+      min-width: 0;
+      overflow: hidden;
     }
 
-    .revisao-file-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .revisao-file-icon { font-size: 1.2rem; flex-shrink: 0; }
 
-    .revisao-file-info { flex: 1; min-width: 0; }
+    .revisao-file-info { flex: 1; min-width: 0; overflow: hidden; }
     .revisao-file-name {
-      font-size: .82rem;
+      font-size: .78rem;
       font-weight: 700;
       color: var(--text);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      max-width: 100%;
     }
-    .revisao-file-meta { font-size: .68rem; color: var(--text-muted); margin-top: 2px; }
+    .revisao-file-meta { font-size: .65rem; color: var(--text-muted); margin-top: 2px; white-space: nowrap; }
+
+    .revisao-file-current .btn-download {
+      flex-shrink: 0;
+      font-size: .7rem;
+      padding: 5px 8px;
+      white-space: nowrap;
+    }
 
     .revisao-actions {
       display: flex;
@@ -2581,7 +2591,7 @@
 
           ${badgeHtml}
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;min-width:0;overflow:hidden">
             ${makeArquivoSlotHtml(card, 1)}
             ${makeArquivoSlotHtml(card, 2)}
           </div>
