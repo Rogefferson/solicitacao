@@ -2077,9 +2077,8 @@
     })() : ''}
     ${card.status === 'em_producao' ? (() => {
       const hist = Array.isArray(card.historico_revisao) ? card.historico_revisao : [];
-      const ajustes = hist.filter(h => h.tipo === 'ajuste');
-      if (!ajustes.length) return '';
-      const ultimo = ajustes[ajustes.length - 1];
+      const ultimo = hist.length ? hist[hist.length - 1] : null;
+      if (!ultimo || ultimo.tipo !== 'ajuste') return '';
       return `<div class="card-meta" style="color:var(--orange);font-weight:800">⚠️ Ajuste pendente · ${esc(ultimo.nome)}</div>`;
     })() : ''}
     <div class="card-footer">
